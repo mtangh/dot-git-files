@@ -2,7 +2,7 @@
 THIS="${0##*/}"
 CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
 
-DOT_GIT_URL="${DOT_GIT_URL:-https://github.com/mtangh/dot-git-files}"
+DOT_GIT_URL="${DOT_GIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
 
 set -u
 
