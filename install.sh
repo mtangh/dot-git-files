@@ -41,19 +41,22 @@ git_global=1
 }
 
 for dotgitfile in \
-  gitattributes:core.attributesfile \
-  gitignore:core.excludesfile
+  "gitattributes:core.attributesfile" \
+  "gitignore:core.excludesfile"
 do
 
   dotgitckey="${dotgitfile##*:}"
   [ -n "${dotgitckey}" ] &&
   dotgitfile="${dotgitfile%:*}"
 
+  [ $MODE_DRYRUN -eq 0 ] ||
+  echo "dotgitfile=$dotgitfile dotgitckey=$dotgitckey"
+
   [ $git_global -eq 0 ] &&
   dotgitdest="./.${dotgitfile}"
   [ $git_global -eq 0 ] || {
     [ -n "${dotgitckey}" ] &&
-    dotgitdest=$(git config --global "${dotgitckey}")
+    eval "dotgitdest=$(git config --global ${dotgitckey})"
     [ -z "${dotgitdest}" ] &&
     dotgitdest="${HOME}/.${dotgitfile}"
   }
@@ -61,18 +64,22 @@ do
   [ -n "$dotgitfile" ] || continue
   [ -n "$dotgitdest" ] || continue
 
-  curl -sL "${DOT_GIT_URL}/${dotgitfile}" |
-  tee "${dotgitwdir}/${dotgitfile}" |
-  diff "${dotgitdest}" - 1>/dev/null 2>&1 &&
+  [ $MODE_DRYRUN -eq 0 ] ||
+  echo "dotgitdest=$dotgitdest"
+
+  curl -sL "${DOT_GIT_URL}/${dotgitfile}" 1>"${dotgitwdir}/${dotgitfile}" ||
+    continue
+  [ -s "${dotgitwdir}/${dotgitfile}" ] ||
+    continue
+  diff -u "${dotgitwdir}/${dotgitfile}" ${dotgitdest} &&
+    continue
+  $dotgitcopy "${dotgitwdir}/${dotgitfile}" ${dotgitdest} ||
     continue
 
-  [ -s "${dotgitwdir}/${dotgitfile}" ] &&
-  $dotgitcopy "${dotgitwdir}/${dotgitfile}" "${dotgitdest}" && {
-    echo "* ${dotgitdest} >>>"
-    cat -n "${dotgitwdir}/${dotgitfile}" |head -n 10
-    echo "    :"
-    echo
-  }
+  echo "${dotgitdest} >>>"
+  cat -n "${dotgitwdir}/${dotgitfile}" |head -n 10
+  echo "      :"
+  echo
 
 done 2>/dev/null
 
