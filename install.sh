@@ -3,6 +3,18 @@ THIS="${0##*/}"
 CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
 
 DOT_GIT_URL="${DOT_GIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
+MODE_DRYRUN=0
+
+[ -n "$DEBUG" ] &&
+MODE_DRYRUN=1
+
+case "$1" in
+--dry-run*|--debug*|-d)
+  MODE_DRYRUN=1
+  ;;
+*)
+  ;;
+esac
 
 set -u
 
@@ -11,6 +23,10 @@ dotgitckey=""
 dotgitdest=""
 dotgitwdir="/tmp/.dot-git-files.$$"
 git_global=0
+
+dotgitcopy="cp -pf"
+[ $MODE_DRYRUN -ne 0 ] &&
+dotgitcopy="echo ${dotgitcopy}"
 
 [ -d "./.git/" ] ||
 git_global=1
@@ -51,7 +67,7 @@ do
     continue
 
   [ -s "${dotgitwdir}/${dotgitfile}" ] &&
-  echo cp -pf "${dotgitwdir}/${dotgitfile}" "${dotgitdest}" && {
+  $dotgitcopy "${dotgitwdir}/${dotgitfile}" "${dotgitdest}" && {
     echo "* ${dotgitdest} >>>"
     cat -n "${dotgitwdir}/${dotgitfile}" |head -n 10
     echo "    :"
