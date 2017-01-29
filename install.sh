@@ -71,7 +71,7 @@ do
     continue
   [ -s "${dotgitwdir}/${dotgitfile}" ] ||
     continue
-  diff -u "${dotgitwdir}/${dotgitfile}" ${dotgitdest} &&
+  diff -u "${dotgitwdir}/${dotgitfile}" ${dotgitdest} 1>/dev/null &&
     continue
   $dotgitcopy "${dotgitwdir}/${dotgitfile}" ${dotgitdest} ||
     continue
