@@ -9,7 +9,7 @@ set -u
 dotgitfile=""
 dotgitckey=""
 dotgitdest=""
-dotgitwdir="/tmp/.$$"
+dotgitwdir="/tmp/.dot-git-files.$$"
 git_global=0
 
 [ -d "./.git/" ] ||
@@ -20,13 +20,11 @@ git_global=1
 }
 
 [ -d "$dotgitwdir" ] && {
-  trap SIGTERM "rm -rf ${dotgitwdir}/ 1>/dev/null 2>&1"
-  trap SIGQUIT "rm -rf ${dotgitwdir}/ 1>/dev/null 2>&1"
-  trap SIGHUP  "rm -rf ${dotgitwdir}/ 1>/dev/null 2>&1"
-  trap EXIT    "rm -rf ${dotgitwdir}/ 1>/dev/null 2>&1"
+  trap "rm -rf ${dotgitwdir}/ 1>/dev/null 2>&1" SIGTERM SIGHUP SIGINT SIGQUIT
+  trap "rm -rf ${dotgitwdir}/ 1>/dev/null 2>&1" EXIT
 }
 
-for dotgitfile in 
+for dotgitfile in \
   gitattributes:core.attributesfile \
   gitignore:core.excludesfile
 do
@@ -53,10 +51,10 @@ do
     continue
 
   [ -s "${dotgitwdir}/${dotgitfile}" ] &&
-  cp -pf "${dotgitwdir}/${dotgitfile}" "${dotgitdest}" && {
+  echo cp -pf "${dotgitwdir}/${dotgitfile}" "${dotgitdest}" && {
     echo "* ${dotgitdest} >>>"
     cat -n "${dotgitwdir}/${dotgitfile}" |head -n 10
-    echo "  :"
+    echo "    :"
     echo
   }
 
