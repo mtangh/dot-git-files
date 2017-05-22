@@ -42,7 +42,8 @@ git_global=1
 
 for dotgitfile in \
   "gitattributes:core.attributesfile" \
-  "gitignore:core.excludesfile"
+  "gitignore:core.excludesfile" \
+  "gitkeep.sh:-"
 do
 
   dotgitckey="${dotgitfile##*:}"
@@ -56,6 +57,7 @@ do
   dotgitdest="./.${dotgitfile}"
   [ $git_global -eq 0 ] || {
     [ -n "${dotgitckey}" ] &&
+    [ "${dotgitckey}" != "-" ] &&
     eval "dotgitdest=$(git config --global ${dotgitckey})"
     [ -z "${dotgitdest}" ] &&
     dotgitdest="${HOME}/.${dotgitfile}"
