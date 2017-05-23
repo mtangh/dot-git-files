@@ -26,6 +26,8 @@ install:
 script:
   # Basic script syntax check
   - bash -n install.sh
+  # Basic script syntax check
+  - bash -n gitkeep.sh
 
 #notifications:
 #  webhooks: https://galaxy.ansible.com/api/v1/notifications/
