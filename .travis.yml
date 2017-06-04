@@ -26,8 +26,10 @@ install:
 script:
   # Basic script syntax check
   - bash -n install.sh
-  # Basic script syntax check
   - bash -n gitkeep.sh
+  # Run
+  - bash -n gitkeep.sh && bash gitkeep.sh |grep ": Finding '.'."
+  - bash -n gitkeep.sh && bash gitkeep.sh /tmp |grep ": Finding '/tmp'."
 
 #notifications:
 #  webhooks: https://galaxy.ansible.com/api/v1/notifications/

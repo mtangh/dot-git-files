@@ -83,7 +83,7 @@ printf "%b" "${basedirs}" |sort -u |
 while read base_dir
 do
 
-  echo "${BASE}: Finding '$base_dir'"
+  echo "${BASE}: Finding '$base_dir'."
 
   find "$base_dir" -type d |sort -u |
   while read keep_dir
