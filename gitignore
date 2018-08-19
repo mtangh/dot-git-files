@@ -1,4 +1,5 @@
 # .gitignore
+#
 
 # Compiled object files
 *.o
@@ -121,6 +122,8 @@ svn-commit*.tmp
 *.mine
 *.merge-left
 *.merge-right
+*.merge-left.*
+*.merge-right.*
 
 ## CVS
 CVS/
@@ -214,5 +217,12 @@ nb-configuration.xml
 
 ## intellij idea ##
 .idea/
+
+# Test binary, build with `go test -c`
+*.test
+
+# Project-local glide cache, 
+# RE: https://github.com/Masterminds/glide/issues/736
+.glide/
 
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline

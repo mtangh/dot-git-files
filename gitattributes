@@ -119,6 +119,7 @@
 *.m           diff=objc
 *.mm          diff=objc
 *.swift       text
+*.go          text
 *.java        diff=java
 *.properties  text
 *.pl          diff=perl   eol=lf
@@ -136,6 +137,7 @@
 *.lua         text
 *.js          text
 *.json        text
+*.scpt        text
 *.sql         text
 *.sh          eol=lf
 *.csh         eol=lf

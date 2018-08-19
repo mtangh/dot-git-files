@@ -4,17 +4,25 @@ CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
 
 DOT_GIT_URL="${DOT_GIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
 MODE_DRYRUN=0
+GIT_PROJECT=0
 
 [ -n "$DEBUG" ] &&
 MODE_DRYRUN=1
 
-case "$1" in
---dry-run*|--debug*|-d)
-  MODE_DRYRUN=1
-  ;;
-*)
-  ;;
-esac
+while [ $# -gt 0 ]
+do
+  case "$1" in
+  --dry-run*|--debug*|-d)
+    MODE_DRYRUN=1
+    ;;
+  --local|--project|-p)
+    GIT_PROJECT=1
+    ;;
+  *)
+    ;;
+  esac
+  shift
+done
 
 set -u
 
@@ -28,8 +36,10 @@ dotgitcopy="cp -pf"
 [ $MODE_DRYRUN -ne 0 ] &&
 dotgitcopy="echo ${dotgitcopy}"
 
-[ -d "./.git/" ] ||
-git_global=1
+[ $GIT_PROJECT -eq 0 ] && {
+  [ -d "./.git/" ] ||
+  git_global=1
+}
 
 [ -d "$dotgitwdir" ] || {
   mkdir -p "$dotgitwdir" 1>/dev/null 2>&1
