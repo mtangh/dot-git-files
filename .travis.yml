@@ -27,9 +27,10 @@ script:
   # Basic script syntax check
   - bash -n install.sh
   - bash -n gitkeep.sh
+  - bash -n git-files-update.sh
   # Run
-  - bash gitkeep.sh |grep " Finding '.'."
-  - bash gitkeep.sh /tmp |grep " Finding '/tmp'."
+  - bash gitkeep.sh |grep " Gitkeep directory '.'."
+  - bash gitkeep.sh /tmp |grep " Gitkeep directory '/tmp'."
 
 #notifications:
 #  webhooks: https://galaxy.ansible.com/api/v1/notifications/
