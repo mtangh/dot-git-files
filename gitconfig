@@ -1,0 +1,493 @@
+# .gitconfig
+# https://github.com/mtangh/dot-git-files/
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+[core]
+
+	# core.fileMode:
+	# Tells Git if the executable bit of files in the working tree
+	# is to be honored.
+	# Some filesystems lose the executable bit when a file that is
+	# marked as executable is checked out, or checks out a
+	# non-executable file with executable bit on. git-clone[1] or
+	# git-init[1] probe the filesystem to see if it handles the
+	# executable bit correctly and this variable is automatically
+	# set as necessary.
+	# A repository, however, may be on a filesystem that handles
+	# the filemode correctly, and this variable is set to true when
+	# created, but later may be made accessible from another
+	# environment that loses the filemode (e.g. exporting ext4 via
+	# CIFS mount, visiting a Cygwin created repository with Git for
+	# Windows or Eclipse). In such a case it may be necessary to
+	# set this variable to false. See git-update-index[1].
+	# The default is true (when core.filemode is not specified in
+	# the config file).
+	filemode = true
+
+	# core.ignoreCase:
+	# Internal variable which enables various workarounds to enable
+	# Git to work better on filesystems that are not case sensitive,
+	# like APFS, HFS+, FAT, NTFS, etc. For example, if a directory
+	# listing finds "makefile" when Git expects "Makefile", Git will
+	# assume it is really the same file, and continue to remember
+	# it as "Makefile".
+	# The default is false, except git-clone[1] or git-init[1] will
+	# probe and set core.ignoreCase true if appropriate when the
+	# repository is created.
+	# Git relies on the proper configuration of this variable for
+	# your operating and file system. Modifying this value may
+	# result in unexpected behavior.
+	ignorecase = false
+
+	# core.attributesFile:
+	# In addition to .gitattributes (per-directory) and
+	# .git/info/attributes, Git looks into this file for attributes
+	# (see gitattributes[5]).
+	attributesfile = ~/.config/git/attributes
+
+	# core.excludesFile:
+	# Specifies the pathname to the file that contains patterns to
+	# describe paths that are not meant to be tracked, in addition
+	# to .gitignore (per-directory) and .git/info/exclude. 
+	excludesfile = ~/.config/git/ignore
+
+	# core.hooksPath:
+	# By default Git will look for your hooks in the $GIT_DIR/hooks
+	# directory. Set this to different path, e.g. /etc/git/hooks,
+	# and Git will try to find your hooks in that directory, 
+	# e.g. /etc/git/hooks/pre-receive instead of in
+	# $GIT_DIR/hooks/pre-receive.
+	# The path can be either absolute or relative. A relative path
+	# is taken as relative to the directory where the hooks are run
+	# (see the "DESCRIPTION" section of githooks[5]).
+	# This configuration variable is useful in cases where you’d
+	# like to centrally configure your Git hooks instead of
+	# configuring them on a per-repository basis, or as a more
+	# flexible and centralized alternative to having an
+	# init.templateDir where you’ve changed default hooks.
+	hookspath = ~/.config/git/hooks
+
+	# core.editor:
+	# Commands such as commit and tag that let you edit messages by
+	# launching an editor use the value of this variable when it is
+	# set, and the environment variable GIT_EDITOR is not set. See
+	# git-var[1].
+	editor = vim -c \"set fenc=utf-8\"
+
+	# core.pager:
+	# Text viewer for use by Git commands (e.g., less). The value is
+	# meant to be interpreted by the shell. The order of preference
+	# is the $GIT_PAGER environment variable, then core.pager
+	# configuration, then $PAGER, and then the default chosen at
+	# compile time (usually less).
+#	pager = lv -c
+	pager =
+
+	# core.precomposeUnicode:
+	# This option is only used by Mac OS implementation of Git. When
+	# core.precomposeUnicode=true, Git reverts the unicode
+	# decomposition of filenames done by Mac OS. This is useful when
+	# sharing a repository between Mac OS and Linux or Windows. (Git
+	# for Windows 1.7.10 or higher is needed, or Git under cygwin
+	# 1.7). When false, file names are handled fully transparent by
+	# Git, which is backward compatible with older versions of Git.
+	precomposeunicode = true
+
+	# core.quotePath:
+	# Commands that output paths (e.g. ls-files, diff), will quote
+	# "unusual" characters in the pathname by enclosing the pathname
+	# in double-quotes and escaping those characters with backslashes
+	# in the same way C escapes control characters (e.g. \t for TAB,
+	# \n for LF, \\ for backslash) or bytes with values larger than
+	# 0x80 (e.g. octal \302\265 for "micro" in UTF-8). If this
+	# variable is set to false, bytes higher than 0x80 are not
+	# considered "unusual" any more. Double-quotes, backslash and
+	# control characters are always escaped regardless of the setting
+	# of this variable. A simple space character is not considered
+	# "unusual". Many commands can output pathnames completely
+	# verbatim using the -z option. The default value is true.
+	quotepath = false
+
+	# core.eol:
+	# Sets the line ending type to use in the working directory for
+	# files that are marked as text (either by having the text
+	# attribute set, or by having text=auto and Git auto-detecting
+	# the contents as text). Alternatives are lf, crlf and native,
+	# which uses the platform’s native line ending. The default value
+	# is native. See gitattributes[5] for more information on
+	# end-of-line conversion. Note that this value is ignored if
+	# core.autocrlf is set to true or input.
+	eol = native
+
+	# core.safecrlf:
+	# If true, makes Git check if converting CRLF is reversible
+	# when end-of-line conversion is active. Git will verify if a
+	# command modifies a file in the work tree either directly or
+	# indirectly. For example, committing a file followed by
+	# checking out the same file should yield the original file in
+	# the work tree. If this is not the case for the current setting
+	# of core.autocrlf, Git will reject the file. The variable can
+	# be set to "warn", in which case Git will only warn about an
+	# irreversible conversion but continue the operation.
+	safecrlf = false
+
+	# core.autocrlf:
+	# Setting this variable to "true" is the same as setting the text
+	# attribute to "auto" on all files and core.eol to "crlf". Set to
+	# true if you want to have CRLF line endings in your working
+	# directory and the repository has LF line endings. This variable
+	# can be set to input, in which case no output conversion is 
+	# performed.
+	autocrlf = input
+
+	# core.whitespace:
+	# A comma separated list of common whitespace problems to notice.
+	# git diff will use color.diff.whitespace to highlight them, and
+	# git apply --whitespace=error will consider them as errors. You
+	# can prefix - to disable any of them (e.g. -trailing-space):
+	# - blank-at-eol
+	#  treats trailing whitespaces at the end of the line as an error
+	#  (enabled by default).
+	# - space-before-tab
+	#  treats a space character that appears immediately before a tab
+	#  character in the initial indent part of the line as an error
+	#  (enabled by default).
+	# - indent-with-non-tab
+	#  treats a line that is indented with space characters instead
+	#  of the equivalent tabs as an error (not enabled by default).
+	# - tab-in-indent
+	#  treats a tab character in the initial indent part of the line
+	#  as an error (not enabled by default).
+	# - blank-at-eof
+	#  treats blank lines added at the end of file as an error 
+	#  (enabled by default).
+	# - trailing-space
+	#  is a short-hand to cover both blank-at-eol and blank-at-eof.
+	# - cr-at-eol
+	#  treats a carriage-return at the end of line as part of the
+	#  line terminator, i.e. with it, trailing-space does not trigger
+	#  if the character before such a carriage-return is not a
+	#  whitespace (not enabled by default).
+	# - tabwidth=<n>
+	#  tells how many character positions a tab occupies; this is
+	#  relevant for indent-with-non-tab and when Git fixes
+	#  tab-in-indent errors. The default tab width is 8. Allowed
+	#  values are 1 to 63.
+	whitespace = trailing-space,blank-at-eol,blank-at-eof, \
+	             space-before-tab,tab-in-indent,tabwidth=4 \
+	             -indent-with-non-tab,-cr-at-eol
+
+[commit]
+
+	# commit.template:
+	# Specify the pathname of a file to use as the template for new
+	# commit messages.
+	template = ~/.config/git/message.txt
+
+	# commit.status:
+	# A boolean to enable/disable inclusion of status information in
+	# the commit message template when using an editor to prepare the
+	# commit message. Defaults to true.
+	status = true
+
+	# commit.verbose:
+	# A boolean or int to specify the level of verbose with git
+	# commit. See git-commit[1].
+	verbose = true
+
+[push]
+
+	# push.default:
+	# Defines the action git push should take if no refspec is
+	# explicitly given. Different values are well-suited for specific
+	# workflows; for instance, in a purely central workflow (i.e. the
+	# fetch source is equal to the push destination), upstream is
+	# probably what you want. Possible values are:
+	# - nothing
+	#  do not push anything (error out) unless a refspec is explicitly
+	#  given. This is primarily meant for people who want to avoid
+	#  mistakes by always being explicit.
+	# - current
+	#  push the current branch to update a branch with the same name
+	#  on the receiving end. Works in both central and non-central
+	#  workflows.
+	# - upstream 
+	#  push the current branch back to the branch whose changes are
+	#  usually integrated into the current branch (which is called 
+	#  @{upstream}). This mode only makes sense if you are pushing to
+	#  the same repository you would normally pull from (i.e. central
+	#  workflow).
+	# - tracking
+	#  This is a deprecated synonym for upstream.
+	# - simple
+	#  in centralized workflow, work like upstream with an added
+	#  safety to refuse to push if the upstream branch’s name is
+	#  different from the local one.
+	#  When pushing to a remote that is different from the remote you
+	#  normally pull from, work as current. This is the safest option
+	#  and is suited for beginners.
+	#  This mode has become the default in Git 2.0.
+	# - matching
+	#  push all branches having the same name on both ends. This makes
+	#  the repository you are pushing to remember the set of branches
+	#  that will be pushed out (e.g. if you always push maint and master
+	#  there and no other branches, the repository you push to will have
+	#  these two branches, and your local maint and master will be
+	#  pushed there).
+	#  To use this mode effectively, you have to make sure all the
+	#  branches you would push out are ready to be pushed out before
+	#  running git push, as the whole point of this mode is to allow you
+	#  to push all of the branches in one go. If you usually finish work
+	#  on only one branch and push out the result, while other branches
+	#  are unfinished, this mode is not for you. Also this mode is not
+	#  suitable for pushing into a shared central repository, as other
+	#  people may add new branches there, or update the tip of existing
+	#  branches outside your control.
+	#  This used to be the default, but not since Git 2.0 (simple is the
+	#  new default).
+	default = simple
+
+[merge]
+
+	# merge.verbosity:
+	# Controls the amount of output shown by the recursive merge strategy.
+	# Level 0 outputs nothing except a final error message if conflicts
+	# were detected. Level 1 outputs only conflicts, 2 outputs conflicts
+	# and file changes. Level 5 and above outputs debugging information.
+	# The default is level 2. Can be overridden by the GIT_MERGE_VERBOSITY
+	# environment variable.
+	verbosity = 2
+
+[status]
+
+	# status.renames:
+	# Whether and how Git detects renames in git-status[1] and git-commit[1].
+	# If set to "false", rename detection is disabled. If set to "true",
+	# basic rename detection is enabled. If set to "copies" or "copy", Git
+	# will detect copies, as well. Defaults to the value of diff.renames.
+	renames = true
+
+	# status.renameLimit:
+	# The number of files to consider when performing rename detection in
+	# git-status[1] and git-commit[1]. Defaults to the value of
+	# diff.renameLimit.
+	renameLimit = 3
+
+	# status.showStash:
+	# If set to true, git-status[1] will display the number of entries
+	# currently stashed away. Defaults to false.
+	showStash = true
+
+	# status.showUntrackedFiles:
+	# By default, git-status[1] and git-commit[1] show files which are not
+	# currently tracked by Git. Directories which contain only untracked
+	# files, are shown with the directory name only. Showing untracked files
+	# means that Git needs to lstat() all the files in the whole repository,
+	# which might be slow on some systems. So, this variable controls how
+	# the commands displays the untracked files. Possible values are:
+	# - no
+	#  Show no untracked files.
+	# - normal
+	#  Show untracked files and directories.
+	# - all
+	#  Show also individual files in untracked directories.
+	# If this variable is not specified, it defaults to normal. This
+	# variable can be overridden with the -u|--untracked-files option of
+	# git-status[1] and git-commit[1].
+	showUntrackedFiles = normal
+
+[receive]
+
+	# receive.denyDeletes:
+	# If set to true, git-receive-pack will deny a ref update that
+	# deletes the ref. Use this to prevent such a ref deletion via a push.
+	denyDeletes = false
+
+	# receive.denyDeleteCurrent:
+	# If set to true, git-receive-pack will deny a ref update that deletes
+	# the currently checked out branch of a non-bare repository.
+	denyDeleteCurrent = false
+
+	# receive.denyCurrentBranch:
+	# If set to true or "refuse", git-receive-pack will deny a ref update
+	# to the currently checked out branch of a non-bare repository. Such
+	# a push is potentially dangerous because it brings the HEAD out of
+	# sync with the index and working tree. If set to "warn", print a
+	# warning of such a push to stderr, but allow the push to proceed. If
+	# set to false or "ignore", allow such pushes with no message. Defaults
+	# to "refuse".
+	# Another option is "updateInstead" which will update the working tree
+	# if pushing into the current branch. This option is intended for
+	# synchronizing working directories when one side is not easily accessible
+	# via interactive ssh (e.g. a live web site, hence the requirement that
+	# the working directory be clean). This mode also comes in handy when
+	# developing inside a VM to test and fix code on different Operating
+	# Systems.
+	# By default, "updateInstead" will refuse the push if the working tree or
+	# the index have any difference from the HEAD, but the push-to-checkout
+	# hook can be used to customize this. See githooks[5].
+	denyCurrentBranch = false
+
+	# receive.denyNonFastForwards:
+	# If set to true, git-receive-pack will deny a ref update which is not
+	# a fast-forward. Use this to prevent such an update via a push, even
+	# if that push is forced. This configuration variable is set when
+	# initializing a shared repository.
+	denyNonFastForwards = false
+
+[remote]
+
+	# remote.pushDefault:
+	# The remote to push to by default. Overrides branch.<name>.remote for
+	# all branches, and is overridden by branch.<name>.pushRemote for
+	# specific branches.
+	#pushDefault = 
+
+[color]
+
+	# color.ui:
+	# This variable determines the default value for variables such as
+	# color.diff and color.grep that control the use of color per command
+	# family. Its scope will expand as more commands learn configuration
+	# to set a default for the --color option. Set it to false or never
+	# if you prefer Git commands not to use color unless enabled
+	# explicitly with some other configuration or the --color option. Set
+	# it to always if you want all output not intended for machine
+	# consumption to use color, to true or auto (this is the default
+	# since Git 1.8.4) if you want such output to use color when written
+	# to the terminal.
+	ui = auto
+
+	# color.interactive:
+	# When set to always, always use colors for interactive prompts and
+	# displays (such as those used by "git-add --interactive" and
+	# "git-clean --interactive"). When false (or never), never. When set to
+	# true or auto, use colors only when the output is to the terminal. If
+	# unset, then the value of color.ui is used (auto by default).
+	interactive = auto
+
+	# color.advice:
+	# A boolean to enable/disable color in hints (e.g. when a push failed,
+	# see advice.* for a list). May be set to always, false (or never) or
+	# auto (or true), in which case colors are used only when the error
+	# output goes to a terminal. If unset, then the value of color.ui is
+	# used (auto by default).
+	advice = auto
+
+	# color.branch:
+	# A boolean to enable/disable color in the output of git-branch[1]. May
+	# be set to always, false (or never) or auto (or true), in which case
+	# colors are used only when the output is to a terminal. If unset, then
+	# the value of color.ui is used (auto by default).
+	branch = auto
+
+	# color.push:
+	# A boolean to enable/disable color in push errors. May be set to
+	# always, false (or never) or auto (or true), in which case colors are
+	# used only when the error output goes to a terminal. If unset, then
+	# the value of color.ui is used (auto by default).
+	push = auto
+
+	# color.remote:
+	# If set, keywords at the start of the line are highlighted. The
+	# keywords are "error", "warning", "hint" and "success", and are matched
+	# case-insensitively. May be set to always, false (or never) or auto (or
+	# true). If unset, then the value of color.ui is used (auto by default).
+	remote = auto
+
+	# color.transport:
+	# A boolean to enable/disable color when pushes are rejected. May be set
+	# to always, false (or never) or auto (or true), in which case colors
+	# are used only when the error output goes to a terminal. If unset, then
+	# the value of color.ui is used (auto by default).
+	transport = true
+
+	# color.showBranch:
+	# A boolean to enable/disable color in the output of git-show-branch[1].
+	# May be set to always, false (or never) or auto (or true), in which
+	# case colors are used only when the output is to a terminal. If unset,
+	# then the value of color.ui is used (auto by default).
+	showBranch = auto
+
+	# color.status:
+	# A boolean to enable/disable color in the output of git-status[1]. May
+	# be set to always, false (or never) or auto (or true), in which case
+	# colors are used only when the output is to a terminal. If unset, then
+	# the value of color.ui is used (auto by default).
+	status = auto
+
+	# color.diff:
+	# Whether to use ANSI escape sequences to add color to patches. If this
+	# is set to always, git-diff[1], git-log[1], and git-show[1] will use
+	# color for all patches. If it is set to true or auto, those commands
+	# will only use color when output is to the terminal. If unset, then the
+	# value of color.ui is used (auto by default).
+	# This does not affect git-format-patch[1] or the git-diff-* plumbing
+	# commands. Can be overridden on the command line with the
+	# --color[=<when>] option.
+	diff = auto
+
+	# color.grep:
+	# When set to always, always highlight matches. When false (or never),
+	# never. When set to true or auto, use color only when the output is
+	# written to the terminal. If unset, then the value of color.ui is used
+	# (auto by default).
+	grep = auto
+
+	# color.pager:
+	# A boolean to enable/disable colored output when the pager is in use 
+	# (default is true).
+	pager = auto
+
+[alias]
+
+	# alias.*:
+	# Command aliases for the git[1] command wrapper - e.g. after defining
+	# "alias.last = cat-file commit HEAD", the invocation "git last" is
+	# equivalent to "git cat-file commit HEAD". To avoid confusion and
+	# troubles with script usage, aliases that hide existing Git commands
+	# are ignored. Arguments are split by spaces, the usual shell quoting
+	# and escaping is supported. A quote pair or a backslash can be used to
+	# quote them.
+	# If the alias expansion is prefixed with an exclamation point, it will
+	# be treated as a shell command. For example, defining
+	# "alias.new = !gitk --all --not ORIG_HEAD", the invocation "git new"
+	# is equivalent to running the shell command "gitk --all --not ORIG_HEAD".
+	# Note that shell commands will be executed from the top-level directory
+	# of a repository, which may not necessarily be the current directory.
+	# GIT_PREFIX is set as returned by running git rev-parse --show-prefix
+	# from the original current directory. See git-rev-parse[1].
+
+	co    = checkout
+	ci    = commit
+	stat  = status
+	st    = status
+	sh    = show
+	up    = fetch
+	ft    = fetch
+	ftp   = fetch --prune
+	b     = branch
+	d     = diff
+	dc    = diff --cached
+	ls    = log --pretty=format:'%h %an, %ad: %s' --stat
+	ll    = log --pretty=format:'%h %an, %ad: %s'
+	lg    = log --pretty=format:'%h %an, %ad: %s' --graph
+
+	prune     = fetch --prune
+	undo      = reset --soft HEAD^
+	stash-all = stash save --include-untracked 
+
+[include]
+
+	# include.path, includeIf.*.path:
+	# The include and includeIf sections allow you to include config directives
+	# from another source. These sections behave identically to each other with
+	# the exception that includeIf sections may be ignored if their condition
+	# does not evaluate to true; see "Conditional includes" below.
+	# You can include a config file from another by setting the special
+	# include.path (or includeIf.*.path) variable to the name of the file to be
+	# included. The variable takes a pathname as its value, and is subject to
+	# tilde expansion. These variables can be given multiple times.
+
+	path = ~/.config/git/config.local
+
