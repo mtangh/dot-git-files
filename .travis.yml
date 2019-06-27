@@ -25,9 +25,9 @@ install:
 
 script:
   # Basic script syntax check
-  - bash -n install.sh
+  - bash -n update.sh
   - bash -n gitkeep.sh
-  - bash -n git-files-update.sh
+  - bash -n gitfilesupdate.sh
   # Run
   - bash gitkeep.sh |grep " Gitkeep directory '.'."
   - bash gitkeep.sh /tmp |grep " Gitkeep directory '/tmp'."
