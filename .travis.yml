@@ -12,6 +12,7 @@ install: true
 # Run
 script:
 
+  # Git files update
   - |
     rm -rf ~/.config/git || :
     mkdir -p ~/.config/git
@@ -39,16 +40,16 @@ script:
   - |
     bash -n gitkeep.sh &&
     bash gitkeep.sh |
-    grep " Gitkeep directory '.'."
+    egrep -i " Gitkeep directory '.'."
   - |
     bash -n gitkeep.sh &&
     bash gitkeep.sh /tmp |
-    grep " Gitkeep directory '/tmp'."
+    egrep -i " Gitkeep directory '/tmp'."
   - |
     bash -n gitkeep.sh &&
     mkdir -p /tmp/gitkeep-test/{empty,not-empty} &&
     cd "/tmp/gitkeep-test" && {
-      touch not-empty/file.txt
+      touch not-empty/file.txt &&
       bash gitkeep.sh &&
       [ -r "empty/.gitkeep" ] &&
       [ ! -r "not-empty/.gitkeep" ] &&

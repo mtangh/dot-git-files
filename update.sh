@@ -272,18 +272,24 @@ do
   additlines=$(
     : && {
       [ -d "${dotgitdest}.d" ] && {
-        cat "${dotgitdest}.d"/*.conf |
-        egrep -v '(^[ ]*#.*|^)$'
+        cat "${dotgitdest}.d"/*.conf
       }
     } |wc -l; )
 
-  [ $additlines -gt 0 ] && {
+  [ ${additlines:-0} -gt 0 ] && {
     [ -d "${dotgitdest}.d" ] && {
-      echo
-      echo "# ${dotgitdest}.d"
-      echo
+      cat <<_EOC_
+
+#
+# ${dotgitdest}.d
+#
+
+_EOC_
       cat "${dotgitdest}.d"/*.conf
-      echo
+      cat <<_EOC_
+
+# End of '${dotgitdest}.d'
+_EOC_
     }
   } 1>>"${dotgittemp}" || :
 
