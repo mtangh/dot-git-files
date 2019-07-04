@@ -244,20 +244,20 @@ do
     dotgitdest="${GITAPPLYDIR}/.${dotgitfile}"
   fi
 
-  case "${GITAPPLY_TO};${dotgitdest}" in
-  [01];*/.config/git/*.sh)
+  case "${GITAPPLY_TO}::${dotgitdest}" in
+  [01]::*/.config/git/*.sh)
     dotgitdest="${GITAPPLYDIR}/${dotgitfile}"
     ;;
-  [3];*/.git/info/*.sh)
+  [3]::*/.git/info/*.sh)
     dotgitdest=""
     ;;
-  [3];*/.git/info/*ignore)
+  [3]::*/.git/info/*ignore)
     dotgitdest="${GITAPPLYDIR}/excludes"
     ;;
-  [013];*/{.config/git,.git/info}/git*)
+  [013]::*/{.config/git,.git/info}/git*)
     dotgitdest="${GITAPPLYDIR}/${dotgitfile#*git}"
     ;;
-  [013];*/{.config/git,.git/info}/*)
+  [013]::*/{.config/git,.git/info}/*)
     dotgitdest="${GITAPPLYDIR}/${dotgitfile}"
     ;;
   esac
