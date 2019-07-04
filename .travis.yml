@@ -1,39 +1,66 @@
 ---
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-language: python
-python: "2.7"
+language: minimal
 
 # Use the new container infrastructure
 sudo: false
 
-# Install ansible
-addons:
-  apt:
-    packages:
-    - python-pip
+# Install packages
+install: true
 
-install:
-  ## Install ansible
-  #- pip install ansible
- 
-  ## Check ansible version
-  #- ansible --version
-
-  ## Create ansible.cfg with correct roles_path
-  #- printf '[defaults]\nroles_path=../' >ansible.cfg
-
+# Run
 script:
-  # Basic script syntax check
-  - bash -n update.sh
-  - bash -n gitkeep.sh
-  - bash -n gitfilesupdate.sh
-  # Run
-  - bash gitkeep.sh |grep " Gitkeep directory '.'."
-  - bash gitkeep.sh /tmp |grep " Gitkeep directory '/tmp'."
 
+  - |
+    rm -rf ~/.config/git || :
+    mkdir -p ~/.config/git
+    bash -n update.sh &&
+    bash -n gitfilesupdate.sh &&
+    bash gitfilesupdate.sh -g &&
+    [ -r "~/.config/git/ignore" ] &&
+    [ -r "~/.config/git/attributes" ] &&
+    [ ! -r "~/.config/git/config" ] &&
+    [ ! -r "~/.config/git/config.local.tmplt" ] &&
+    : "OK"
+  - |
+    rm -rf ~/.config/git || :
+    mkdir -p ~/.config/git
+    bash -n update.sh &&
+    bash -n gitfilesupdate.sh &&
+    bash gitfilesupdate.sh -g -c &&
+    [ -r "~/.config/git/ignore" ] &&
+    [ -r "~/.config/git/attributes" ] &&
+    [ -r "~/.config/git/config" ] &&
+    [ -r "~/.config/git/config.local.tmplt" ] &&
+    : "OK"
+
+  # Gitkeep
+  - |
+    bash -n gitkeep.sh &&
+    bash gitkeep.sh |
+    grep " Gitkeep directory '.'."
+  - |
+    bash -n gitkeep.sh &&
+    bash gitkeep.sh /tmp |
+    grep " Gitkeep directory '/tmp'."
+  - |
+    bash -n gitkeep.sh &&
+    mkdir -p /tmp/gitkeep-test/{empty,not-empty} &&
+    cd "/tmp/gitkeep-test" && {
+      touch not-empty/file.txt
+      bash gitkeep.sh &&
+      [ -r "empty/.gitkeep" ] &&
+      [ ! -r "not-empty/.gitkeep" ] &&
+      mv -f not-empty/file.txt empty/ &&
+      bash gitkeep.sh --rebuild &&
+      [ ! -r "empty/.gitkeep" ] &&
+      [ -r "not-empty/.gitkeep" ] &&
+      : "OK"
+    };
+
+# Notifications
 #notifications:
-#  webhooks: https://galaxy.ansible.com/api/v1/notifications/
 #  email:
-#  - youremailaddress
+#  - your@emailaddress
 

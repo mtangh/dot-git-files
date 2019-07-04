@@ -3,7 +3,7 @@ THIS="${0##*/}"
 CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
 # Name
 THIS="${THIS:-gitkeep.sh}"
-BASE="${BASE}"
+BASE="${THIS%.*}"
 
 # Base directories.
 basedirs=""
@@ -16,6 +16,7 @@ _rebuild=0
 _cleanup=0
 _verbose=0
 _dry_run=0
+_debug_f=0
 
 # Usage
 usage() {
@@ -60,6 +61,7 @@ do
     ;;
   -R|--rebuild) _rebuild=1; _cleanup=1 ;;
   -c|--clean)   _cleanup=1 ;;
+  -D|--debug)   _debug_f=1 ;;
   -d|--dry-run) _dry_run=1 ;;
   -v|--verbose) _verbose=1 ;;
   -h|--help)    usage 0 ;;
@@ -79,7 +81,15 @@ do
 done
 
 # No unbound vars
-set -u
+set -Cu
+
+# Enable trace, verbose
+[ $_debug_f -ne 0 ] || {
+  PS4='>(${BASH_SOURCE}:${LINENO})${FUNCNAME:+:$FUNCNAME()}: ';
+  export PS4
+  set -xv
+  _dry_run=1
+}
 
 # Set default '.' (if empty)
 basedirs="${basedirs:-.\n}"
@@ -87,7 +97,7 @@ basedirs="${basedirs:-.\n}"
 # Tag name
 [ -n "${_tagname}" ] && {
   _tagname=".${BASE}"
-}
+} || :
 echo "${_tagname}" |
 egrep '^[.].+' 1>/dev/null 2>&1 || {
   _tagname=".${_tagname}"
@@ -122,7 +132,7 @@ keep_dir=""
     exit 0
   }
 
-} # [ $_cleanup -ne 0 ]
+} || : # [ $_cleanup -ne 0 ]
 
 # Process dirs
 printf "%b" "${basedirs}" |sort -u |

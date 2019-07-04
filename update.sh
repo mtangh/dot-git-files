@@ -3,7 +3,7 @@ THIS="${0##*/}"
 CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
 # Name
 THIS="${THIS:-update.sh}"
-BASE="${BASE}"
+BASE="${THIS%.*}"
 
 # dot-git-files URL
 DOT_GIT_URL="${DOT_GIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
@@ -50,29 +50,38 @@ _verbose() {
   return 0
 }
 
+_cleanup() {
+  _verbose "cleanup."
+  [ -z "${dotgitwdir}" ] && {
+    rm -rf "${dotgitwdir}" 1>/dev/null 2>&1 &&
+    _verbose "removed: '${dotgitwdir}'."
+  } || :
+  return 0
+}
+
 # Parsing command line options
 while [ $# -gt 0 ]
 do
   case "$1" in
-  --global|-g)
+  -g|--global)
     GITAPPLY_TO=1
     ;;
-  --project|--proj|-p)
+  -p|--project|--proj)
     GITAPPLY_TO=2
     ;;
-  --local|--user-only|-u)
+  -u|--local|--user-only)
     GITAPPLY_TO=3
     ;;
-  --with-config|-c)
+  -c|--with-config)
     WITH_CONFIG=1
     ;;
-  --without-config|-C)
+  -C|--without-config)
     WITH_CONFIG=0
     ;;
-  --debug*)
+  -D*|--debug*)
     MODE_DBGRUN=1
     ;;
-  --dry-run*)
+  -d*|--dry-run*)
     MODE_DRYRUN=1
     ;;
   -*)
@@ -88,15 +97,17 @@ done
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
 
+# Enable trace, verbose
+[ $MODE_DBGRUN -eq 0 ] || {
+  PS4='>(${BASH_SOURCE}:${LINENO})${FUNCNAME:+:$FUNCNAME()}: ';
+  export PS4
+  set -xv
+}
+
 # Verbose output
 [ $MODE_DRYRUN -ne 0 ] && {
   VERBOSE_OUT=1
 } || :
-
-# Enable trace, verbose
-[ $MODE_DBGRUN -ne 0 ] && {
-  set -xv
-}
 
 # File get command
 dgcmd_fget=""
@@ -180,9 +191,9 @@ esac
 } 1>/dev/null 2>&1 || :
 
 # Set trap
-[ -d "$dotgitwdir" ] && {
-  trap "rm -rf '${dotgitwdir}/' 1>/dev/null 2>&1" SIGTERM SIGHUP SIGINT SIGQUIT
-  trap "rm -rf '${dotgitwdir}/' 1>/dev/null 2>&1" EXIT
+[ -d "${dotgitwdir}" ] && {
+  trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
+  trap "_cleanup" EXIT
 }
 
 # Process files
@@ -260,10 +271,6 @@ do
 
   additlines=$(
     : && {
-      [ -f "${dotgitdest}.local" ] && {
-        cat "${dotgitdest}.local" |
-        egrep -v '(^[ ]*#.*|^)$'
-      }
       [ -d "${dotgitdest}.d" ] && {
         cat "${dotgitdest}.d"/*.conf |
         egrep -v '(^[ ]*#.*|^)$'
