@@ -50,10 +50,10 @@ script:
   - |
     set -x
     base_dir=$(pwd)
-    bash -n gitkeep.sh &&
-    mkdir -p t/{dir1,dir2,dir3/child1,dir3/child2} &&
-    : "" && {
-      find ./t -type f -exec rm -f {} \; || :
+    mkdir -p t/{dir1,dir2,dir3/child1,dir3/child2} || :
+    find ./t -type f -exec rm -f {} \; || :
+    bash -n gitkeep.sh || exit 11
+    : "Create Gitkeep" && {
       touch t/dir1/file1.txt &&
       touch t/dir3/child1/file2.txt &&
       bash -- "${base_dir}/gitkeep.sh" ./t &&
@@ -61,6 +61,9 @@ script:
       [   -r "t/dir2/.gitkeep" ] &&
       [ ! -r "t/dir3/child1/.gitkeep" ] &&
       [   -r "t/dir3/child2/.gitkeep" ] &&
+      : "OK"
+    } || exit 12
+    : "Rebuild Gitkeep" && {
       mv -f t/dir{1,2}/file1.txt &&
       mv -f t/dir3/child{1,2}/file2.txt &&
       bash -- "${base_dir}/gitkeep.sh" --rebuild ./t &&
@@ -69,8 +72,8 @@ script:
       [   -r "t/dir3/child1/.gitkeep" ] &&
       [ ! -r "t/dir3/child2/.gitkeep" ] &&
       : "OK"
-    };
-
+    } || exit 13
+p
 # Notifications
 #notifications:
 #  email:
