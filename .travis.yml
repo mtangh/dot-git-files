@@ -48,17 +48,17 @@ script:
       touch t/dir1/file1.txt &&
       touch t/dir3/child1/file2.txt &&
       bash -- "${base_dir}/gitkeep.sh" ./t &&
-      [   -r "t/dir1/.gitkeep" ] &&
-      [ ! -r "t/dir2/.gitkeep" ] &&
-      [   -r "t/dir3/child1/.gitkeep" ] &&
-      [ ! -r "t/dir3/child2/.gitkeep" ] &&
-      mv -f t/dir{1,2}/file1.txt &&
-      mv -f t/dir3/child{1,2}/file2.txt &&
-      bash -- "${base_dir}/gitkeep.sh" --rebuild &&
       [ ! -r "t/dir1/.gitkeep" ] &&
       [   -r "t/dir2/.gitkeep" ] &&
       [ ! -r "t/dir3/child1/.gitkeep" ] &&
       [   -r "t/dir3/child2/.gitkeep" ] &&
+      mv -f t/dir{1,2}/file1.txt &&
+      mv -f t/dir3/child{1,2}/file2.txt &&
+      bash -- "${base_dir}/gitkeep.sh" --rebuild &&
+      [   -r "t/dir1/.gitkeep" ] &&
+      [ ! -r "t/dir2/.gitkeep" ] &&
+      [   -r "t/dir3/child1/.gitkeep" ] &&
+      [ ! -r "t/dir3/child2/.gitkeep" ] &&
       : "OK"
     }
 

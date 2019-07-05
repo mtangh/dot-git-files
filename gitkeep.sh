@@ -84,8 +84,8 @@ done
 set -Cu
 
 # Enable trace, verbose
-[ $_debug_f -ne 0 ] || {
-  PS4='>(${BASH_SOURCE}:${LINENO})${FUNCNAME:+:$FUNCNAME()}: ';
+[ $_debug_f -eq 0 ] || {
+  PS4='>(${BASH_SOURCE:-$THIS}:${LINENO:-0})${FUNCNAME:+:$FUNCNAME()}: ';
   export PS4
   set -xv
   _dry_run=1
