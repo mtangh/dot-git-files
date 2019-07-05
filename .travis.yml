@@ -40,7 +40,7 @@ script:
 
   # Gitkeep
   - |
-    base_dir=$(pwd);
+    base_dir=$(pwd)
     bash -n gitkeep.sh &&
     mkdir -p t/{dir1,dir2,dir3/child1,dir3/child2} &&
     : "" && {
@@ -54,7 +54,7 @@ script:
       [ ! -r "empty/.gitkeep" ] &&
       [ -r "not-empty/.gitkeep" ] &&
       : "OK"
-    };
+    }
 
 # Notifications
 #notifications:

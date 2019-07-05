@@ -19,18 +19,19 @@ WITH_CONFIG=0
 
 # Flag: Debug
 MODE_DBGRUN=0
-[ -n "$DEBUG" -o "$DEBUG" != "NO" ] &&
-MODE_DBGRUN=1 || :
 
 # Flag: dry-run
 MODE_DRYRUN=0
-[ -n "$DEBUG" -o "$DEBUG" != "NO" ] &&
-MODE_DRYRUN=1 || :
 
 # Flag: Verbose output
 VERBOSE_OUT=0
-[ -n "$DEBUG" -o "$DEBUG" != "NO" ] &&
-VERBOSE_OUT=1 || :
+
+# Debug
+[ "${DEBUG:-NO}" != "NO" ] && {
+  MODE_DBGRUN=1
+  MODE_DRYRUN=1
+  VERBOSE_OUT=1
+} || :
 
 # Variables
 dotgitfile=""
@@ -99,7 +100,7 @@ set -Cu
 
 # Enable trace, verbose
 [ $MODE_DBGRUN -eq 0 ] || {
-  PS4='>(${BASH_SOURCE}:${LINENO})${FUNCNAME:+:$FUNCNAME()}: ';
+  PS4='>(${BASH_SOURCE:-$THIS}:${LINENO:-0})${FUNCNAME:+:$FUNCNAME()}: '
   export PS4
   set -xv
 }
