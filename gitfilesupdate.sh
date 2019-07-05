@@ -20,6 +20,6 @@ script_get="$(type -P curl 2>/dev/null) -sL"
 script_get="$(type -P wget 2>/dev/null) -qO -"
 # Run
 ${script_get} "${update_sh}" 2>/dev/null |
-/bin/bash -s "$@"
+/bin/bash -s -- "$@"
 # End
 exit $?

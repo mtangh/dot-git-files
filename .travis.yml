@@ -14,47 +14,43 @@ script:
 
   # Git files update
   - |
-    rm -rf ~/.config/git || :
-    mkdir -p ~/.config/git
+    gitconf_dir="${HOME}/.config/git"
     bash -n update.sh &&
     bash -n gitfilesupdate.sh &&
-    bash gitfilesupdate.sh -g &&
-    [ -r "~/.config/git/ignore" ] &&
-    [ -r "~/.config/git/attributes" ] &&
-    [ ! -r "~/.config/git/config" ] &&
-    [ ! -r "~/.config/git/config.local.tmplt" ] &&
-    : "OK"
-  - |
-    rm -rf ~/.config/git || :
-    mkdir -p ~/.config/git
-    bash -n update.sh &&
-    bash -n gitfilesupdate.sh &&
-    bash gitfilesupdate.sh -g -c &&
-    [ -r "~/.config/git/ignore" ] &&
-    [ -r "~/.config/git/attributes" ] &&
-    [ -r "~/.config/git/config" ] &&
-    [ -r "~/.config/git/config.local.tmplt" ] &&
-    : "OK"
+    : "With -g" && {
+      rm -rf "${gitconf_dir}" || :
+      mkdir -p "${gitconf_dir}" &&
+      bash -- gitfilesupdate.sh -g &&
+      [ -r "${gitconf_dir}/ignore" ] &&
+      [ -r "${gitconf_dir}/attributes" ] &&
+      [ ! -r "${gitconf_dir}/config" ] &&
+      [ ! -r "${gitconf_dir}/config.local.tmplt" ] &&
+      : "OK"
+    } &&
+    : "With -g and -c" && {
+      rm -rf "${gitconf_dir}" || :
+      mkdir -p "${gitconf_dir}" &&
+      bash -- gitfilesupdate.sh -g &&
+      [ -r "${gitconf_dir}/ignore" ] &&
+      [ -r "${gitconf_dir}/attributes" ] &&
+      [ -r "${gitconf_dir}/config" ] &&
+      [ -r "${gitconf_dir}/config.local.tmplt" ] &&
+      : "OK"
+    }
 
   # Gitkeep
   - |
+    base_dir=$(pwd);
     bash -n gitkeep.sh &&
-    bash gitkeep.sh |
-    egrep -i " Gitkeep directory '.'."
-  - |
-    bash -n gitkeep.sh &&
-    bash gitkeep.sh /tmp |
-    egrep -i " Gitkeep directory '/tmp'."
-  - |
-    bash -n gitkeep.sh &&
-    mkdir -p /tmp/gitkeep-test/{empty,not-empty} &&
-    cd "/tmp/gitkeep-test" && {
-      touch not-empty/file.txt &&
-      bash gitkeep.sh &&
-      [ -r "empty/.gitkeep" ] &&
+    mkdir -p t/{dir1,dir2,dir3/child1,dir3/child2} &&
+    : "" && {
+      find t -type f -exec rm -f {} \; || :
+      touch t/dir1/file1.txt t/dir3/child1/file2.txt &&
+      bash -- "${base_dir}/gitkeep.sh" ./t &&
+      [ -r "t/dir/.gitkeep" ] &&
       [ ! -r "not-empty/.gitkeep" ] &&
       mv -f not-empty/file.txt empty/ &&
-      bash gitkeep.sh --rebuild &&
+      bash -- "${base_dir}/gitkeep.sh" --rebuild &&
       [ ! -r "empty/.gitkeep" ] &&
       [ -r "not-empty/.gitkeep" ] &&
       : "OK"
