@@ -14,32 +14,41 @@ script:
 
   # Git files update
   - |
+    set -x
     gitconf_dir="${HOME}/.config/git"
-    bash -n update.sh &&
-    bash -n gitfilesupdate.sh &&
-    : "With -g" && {
+    : "" && {
+      bash -n update.sh &&
+      bash -n gitfilesupdate.sh &&
+      : "OK"
+    } || exit 1
+    : "Run with -g" && {
       rm -rf "${gitconf_dir}" || :
       mkdir -p "${gitconf_dir}" &&
       bash -- gitfilesupdate.sh -g &&
       [   -r "${gitconf_dir}/ignore" ] &&
       [   -r "${gitconf_dir}/attributes" ] &&
+      [   -x "${gitconf_dir}/gitfilesupdate.sh" ] &&
+      [   -x "${gitconf_dir}/gitkeep.sh" ] &&
       [ ! -r "${gitconf_dir}/config" ] &&
       [ ! -r "${gitconf_dir}/config.local.tmplt" ] &&
       : "OK"
-    } &&
-    : "With -g and -c" && {
+    } || exit 2
+    : "Run with -g and -c" && {
       rm -rf "${gitconf_dir}" || :
       mkdir -p "${gitconf_dir}" &&
       bash -- gitfilesupdate.sh -g -c &&
       [ -r "${gitconf_dir}/ignore" ] &&
       [ -r "${gitconf_dir}/attributes" ] &&
+      [ -x "${gitconf_dir}/gitfilesupdate.sh" ] &&
+      [ -x "${gitconf_dir}/gitkeep.sh" ] &&
       [ -r "${gitconf_dir}/config" ] &&
       [ -r "${gitconf_dir}/config.local.tmplt" ] &&
       : "OK"
-    }
+    } || exit 3
 
   # Gitkeep
   - |
+    set -x
     base_dir=$(pwd)
     bash -n gitkeep.sh &&
     mkdir -p t/{dir1,dir2,dir3/child1,dir3/child2} &&
@@ -54,13 +63,13 @@ script:
       [   -r "t/dir3/child2/.gitkeep" ] &&
       mv -f t/dir{1,2}/file1.txt &&
       mv -f t/dir3/child{1,2}/file2.txt &&
-      bash -- "${base_dir}/gitkeep.sh" --rebuild &&
+      bash -- "${base_dir}/gitkeep.sh" --rebuild ./t &&
       [   -r "t/dir1/.gitkeep" ] &&
       [ ! -r "t/dir2/.gitkeep" ] &&
       [   -r "t/dir3/child1/.gitkeep" ] &&
       [ ! -r "t/dir3/child2/.gitkeep" ] &&
       : "OK"
-    }
+    };
 
 # Notifications
 #notifications:
