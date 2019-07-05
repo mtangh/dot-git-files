@@ -21,8 +21,8 @@ script:
       rm -rf "${gitconf_dir}" || :
       mkdir -p "${gitconf_dir}" &&
       bash -- gitfilesupdate.sh -g &&
-      [ -r "${gitconf_dir}/ignore" ] &&
-      [ -r "${gitconf_dir}/attributes" ] &&
+      [   -r "${gitconf_dir}/ignore" ] &&
+      [   -r "${gitconf_dir}/attributes" ] &&
       [ ! -r "${gitconf_dir}/config" ] &&
       [ ! -r "${gitconf_dir}/config.local.tmplt" ] &&
       : "OK"
@@ -30,7 +30,7 @@ script:
     : "With -g and -c" && {
       rm -rf "${gitconf_dir}" || :
       mkdir -p "${gitconf_dir}" &&
-      bash -- gitfilesupdate.sh -g &&
+      bash -- gitfilesupdate.sh -g -c &&
       [ -r "${gitconf_dir}/ignore" ] &&
       [ -r "${gitconf_dir}/attributes" ] &&
       [ -r "${gitconf_dir}/config" ] &&
@@ -44,15 +44,21 @@ script:
     bash -n gitkeep.sh &&
     mkdir -p t/{dir1,dir2,dir3/child1,dir3/child2} &&
     : "" && {
-      find t -type f -exec rm -f {} \; || :
-      touch t/dir1/file1.txt t/dir3/child1/file2.txt &&
+      find ./t -type f -exec rm -f {} \; || :
+      touch t/dir1/file1.txt &&
+      touch t/dir3/child1/file2.txt &&
       bash -- "${base_dir}/gitkeep.sh" ./t &&
-      [ -r "t/dir/.gitkeep" ] &&
-      [ ! -r "not-empty/.gitkeep" ] &&
-      mv -f not-empty/file.txt empty/ &&
+      [   -r "t/dir1/.gitkeep" ] &&
+      [ ! -r "t/dir2/.gitkeep" ] &&
+      [   -r "t/dir3/child1/.gitkeep" ] &&
+      [ ! -r "t/dir3/child2/.gitkeep" ] &&
+      mv -f t/dir{1,2}/file1.txt &&
+      mv -f t/dir3/child{1,2}/file2.txt &&
       bash -- "${base_dir}/gitkeep.sh" --rebuild &&
-      [ ! -r "empty/.gitkeep" ] &&
-      [ -r "not-empty/.gitkeep" ] &&
+      [ ! -r "t/dir1/.gitkeep" ] &&
+      [   -r "t/dir2/.gitkeep" ] &&
+      [ ! -r "t/dir3/child1/.gitkeep" ] &&
+      [   -r "t/dir3/child2/.gitkeep" ] &&
       : "OK"
     }
 
