@@ -24,7 +24,7 @@ script:
     : "Run with -g" && {
       rm -rf "${gitconf_dir}" || :
       mkdir -p "${gitconf_dir}" &&
-      bash -x -- gitfilesupdate.sh -v -g &&
+      bash -x -- update.sh -g &&
       [   -r "${gitconf_dir}/ignore" ] &&
       [   -r "${gitconf_dir}/attributes" ] &&
       [   -x "${gitconf_dir}/gitfilesupdate.sh" ] &&
@@ -32,11 +32,11 @@ script:
       [ ! -r "${gitconf_dir}/config" ] &&
       [ ! -r "${gitconf_dir}/config.local.tmplt" ] &&
       : "OK"
-    } || exit 2
+    } &&
     : "Run with -g and -c" && {
       rm -rf "${gitconf_dir}" || :
       mkdir -p "${gitconf_dir}" &&
-      bash -x -- gitfilesupdate.sh -v -g -c &&
+      bash -x -- update.sh -g -c &&
       [ -r "${gitconf_dir}/ignore" ] &&
       [ -r "${gitconf_dir}/attributes" ] &&
       [ -x "${gitconf_dir}/gitfilesupdate.sh" ] &&
@@ -44,7 +44,8 @@ script:
       [ -r "${gitconf_dir}/config" ] &&
       [ -r "${gitconf_dir}/config.local.tmplt" ] &&
       : "OK"
-    }
+    } &&
+    : "DONE."
 
   # Gitkeep
   - |
@@ -52,7 +53,10 @@ script:
     base_dir=$(pwd)
     mkdir -p t/{dir1,dir2,dir3/child1,dir3/child2} || :
     find ./t -type f -exec rm -f {} \; || :
-    bash -n gitkeep.sh &&
+    : "Basic syntax check" && {
+      bash -n gitkeep.sh &&
+      : "OK"
+    } &&
     : "Create Gitkeep" && {
       touch t/dir1/file1.txt &&
       touch t/dir3/child1/file2.txt &&
@@ -72,7 +76,8 @@ script:
       [   -r "t/dir3/child1/.gitkeep" ] &&
       [ ! -r "t/dir3/child2/.gitkeep" ] &&
       : "OK"
-    }
+    } &&
+    : "DONE."
 p
 # Notifications
 #notifications:
