@@ -78,7 +78,7 @@ script:
       : "OK"
     } &&
     : "DONE."
-p
+
 # Notifications
 #notifications:
 #  email:
