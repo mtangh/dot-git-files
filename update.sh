@@ -197,21 +197,24 @@ esac
   trap "_cleanup" EXIT
 }
 
-# Process files
-for dotgitfile in $(
-[ $WITH_CONFIG -ne 0 -a $GITAPPLY_TO -le 1 ] && {
-cat <<_LIST_
+# List dot git files
+dotgitlist=$(
+  [ $WITH_CONFIG -ne 0 -a $GITAPPLY_TO -le 1 ] && {
+    cat <<_LIST_
 gitconfig:-
 gitconfig.local.tmplt:-
 _LIST_
-} || :
-cat <<_LIST_
+  } || :
+  cat <<_LIST_
 gitattributes:core.attributesfile
 gitignore:core.excludesfile
 gitkeep.sh:-
 gitupdatefiles.sh:-
 _LIST_
 )
+
+# Process files
+for dotgitfile in $dotgitlist
 do
 
   dotgitfike=""
