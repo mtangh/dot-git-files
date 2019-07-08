@@ -194,11 +194,11 @@ esac
 # Set trap
 [ -d "${dotgitwdir}" ] && {
   trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
-  trap "_cleanup" EXIT
+# trap "_cleanup" EXIT
 }
 
-# List dot git files
-dotgitlist=$(
+# Process files
+for dotgitfile in $(
   [ $WITH_CONFIG -ne 0 -a $GITAPPLY_TO -le 1 ] && {
     cat <<_LIST_
 gitconfig:-
@@ -212,9 +212,6 @@ gitkeep.sh:-
 gitupdatefiles.sh:-
 _LIST_
 )
-
-# Process files
-for dotgitfile in $dotgitlist
 do
 
   dotgitfike=""
@@ -354,7 +351,7 @@ _EOC_
 
   echo
 
-done 2>/dev/null
+done #2>/dev/null
 
 # End
 exit 0
