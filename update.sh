@@ -194,7 +194,6 @@ esac
 # Set trap
 [ -d "${dotgitwdir}" ] && {
   trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
-# trap "_cleanup" EXIT
 }
 
 # Process files
@@ -233,35 +232,43 @@ do
   if [ $GITAPPLY_TO -ne 2 ] &&
      [ -n "${dotgitckey}" -a "${dotgitckey}" != "-" ]
   then
+
     if [ $GITAPPLY_TO -eq 3 ]
     then dotgitckey="--local ${dotgitckey}"
     else dotgitckey="--global ${dotgitckey}"
     fi
+
     eval "dotgitdest=$(git config ${dotgitckey})"
-  fi
+
+  fi # if [ $GITAPPLY_TO -ne 2 ] && ...
 
   if [ -z "${dotgitdest}" ]
   then
-    dotgitdest="${GITAPPLYDIR}/.${dotgitfile}"
-  fi
 
-  case "${GITAPPLY_TO}::${dotgitdest}" in
-  [01]::*/.config/git/*.sh)
     dotgitdest="${GITAPPLYDIR}/${dotgitfile}"
-    ;;
-  [3]::*/.git/info/*.sh)
-    dotgitdest=""
-    ;;
-  [3]::*/.git/info/*ignore)
-    dotgitdest="${GITAPPLYDIR}/excludes"
-    ;;
-  [013]::*/{.config/git,.git/info}/git*)
-    dotgitdest="${GITAPPLYDIR}/${dotgitfile#*git}"
-    ;;
-  [013]::*/{.config/git,.git/info}/*)
-    dotgitdest="${GITAPPLYDIR}/${dotgitfile}"
-    ;;
-  esac
+
+    case "${GITAPPLY_TO}::${dotgitdest}" in
+    [01]::*/.config/git/*.sh)
+      dotgitdest="${GITAPPLYDIR}/${dotgitfile}"
+      ;;
+    [3]::*/.git/info/*.sh)
+      dotgitdest=""
+      ;;
+    [3]::*/.git/info/*ignore)
+      dotgitdest="${GITAPPLYDIR}/excludes"
+      ;;
+    [013]::*/{.config/git,.git/info}/git*)
+      dotgitdest="${GITAPPLYDIR}/${dotgitfile#*git}"
+      ;;
+    [013]::*/{.config/git,.git/info}/*)
+      dotgitdest="${GITAPPLYDIR}/${dotgitfile}"
+      ;;
+    *)
+      dotgitdest="${GITAPPLYDIR}/.${dotgitfile}"
+      ;;
+    esac
+
+  fi # if [ -z "${dotgitdest}" ]
 
   [ -n "$dotgitfile" ] || continue
   [ -n "$dotgit_url" ] || continue
@@ -351,7 +358,7 @@ _EOC_
 
   echo
 
-done #2>/dev/null
+done 2>/dev/null
 
 # End
 exit 0
