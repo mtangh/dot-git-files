@@ -142,19 +142,21 @@ case "${GITAPLY_TO}" in
   GITAPLYDIR="${HOME}"
   ;;
 2)
-  [ -n "${GITAPLYDIR}"  ] ||
-  GITAPLYDIR="$(pwd)"
-  if [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.git" ]
+  if [ -z "${GITAPLYDIR}" ]
   then
-    GITAPLYDIR="${GITAPLYDIR}/.git"
-  else
+    GITAPLYDIR="$(pwd)"
+  fi
+  if [ -z "${GITAPLYDIR}" -o ! -d "${GITAPLYDIR}/.git" ]
+  then
     echo "$THIS: ERROR: '.git' no such directory in '${GITAPLYDIR}'." 1>&2
     exit 1
   fi || :
   ;;
 3)
-  [ -n "${GITAPLYDIR}"  ] ||
-  GITAPLYDIR="$(pwd)"
+  if [ -z "${GITAPLYDIR}" ]
+  then
+    GITAPLYDIR="$(pwd)"
+  fi
   if [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.git/info" ]
   then
     GITAPLYDIR="${GITAPLYDIR}/.git/info"
@@ -164,11 +166,13 @@ case "${GITAPLY_TO}" in
   fi || :
   ;;
 *)
-  if [ -n "${GITAPLYDIR}"  ]
+  if [ -z "${GITAPLYDIR}"  ]
   then
     GITAPLYDIR="$(pwd)"
   fi
-  if [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.git" ]
+  if [ -n "${GITAPLYDIR}" -a \
+       -f "${GITAPLYDIR}/.git/config" -a \
+       -d "${GITAPLYDIR}/.git/info" ]
   then
     GITAPLY_TO=2
   elif [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.config/git" ]
@@ -293,14 +297,14 @@ do
       cat <<_EOC_
 
 #
-# ${dotgitdest}.d
+# ${dotgitdest##*/}.d
 #
 
 _EOC_
       cat "${dotgitdest}.d"/*.conf
       cat <<_EOC_
 
-# End of '${dotgitdest}.d'
+# End of '${dotgitdest##*/}.d'
 _EOC_
     }
   } 1>>"${dotgittemp}" || :
@@ -329,6 +333,7 @@ _EOC_
       *.sh) chmod a+x "${dotgitdest}" ;;
       *) ;;
       esac
+      [ $GITAPLY_TO -le 1 ] &&
       [ -s "${dotgitdiff}" ] && {
         cat "${dotgitdiff}" 1>|"${dotgitbkup}"
       } || :
