@@ -359,7 +359,7 @@ _EOC_
 
   echo
 
-done 2>/dev/null
+done #2>/dev/null
 
 # End
 exit 0
