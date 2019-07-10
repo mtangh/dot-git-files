@@ -283,7 +283,7 @@ do
       [ -d "${dotgitdest}.d" ] && {
         cat "${dotgitdest}.d"/*.conf
       }
-    } |wc -l; )
+    } 2>/dev/null |wc -l; )
 
   [ ${additlines:-0} -gt 0 ] && {
     [ -d "${dotgitdest}.d" ] && {
@@ -309,8 +309,7 @@ _EOC_
 
   if [ -e "${dotgitdest}" ]
   then
-    ${dgcmd_diff} -u \
-    "${dotgittemp}" "${dotgitdest}" 1>|"${dotgitdiff}" && {
+    ${dgcmd_diff} -u "${dotgittemp}" "${dotgitdest}" 1>|"${dotgitdiff}" && {
       _verbose "Same '${dotgittemp}' and '${dotgitdest}'."
       continue
     }
@@ -324,7 +323,8 @@ _EOC_
   then
     cat "${dotgittemp}" 1>|"${dotgitdest}" && {
       [ -s "${dotgitdiff}" ] && {
-      cat "${dotgitdiff}" 1>|"${dotgitbkup}" || :; }
+        cat "${dotgitdiff}" 1>|"${dotgitbkup}"
+      } || :
     } &&
     _verbose "Update '${dotgitdest}'."
   else
