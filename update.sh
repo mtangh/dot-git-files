@@ -209,7 +209,7 @@ _LIST_
 gitattributes:core.attributesfile
 gitignore:core.excludesfile
 gitkeep.sh:-
-gitupdatefiles.sh:-
+gitfilesupdate.sh:-
 _LIST_
 )
 do
@@ -276,7 +276,10 @@ do
   [ -n "$dotgittemp" ] || continue
   [ -n "$dotgitdest" ] || continue
 
-  ${dgcmd_fget} "${dotgit_url}" 1>|"${dotgittemp}" 2>/dev/null
+  ${dgcmd_fget} "${dotgit_url}" 1>|"${dotgittemp}" 2>/dev/null || {
+    rm -f "${dotgittemp}" 1>/dev/null 2>&1
+    continue
+  }
 
   additlines=$(
     : && {
@@ -322,6 +325,10 @@ _EOC_
   if [ $MODEDRYRUN -eq 0 ]
   then
     cat "${dotgittemp}" 1>|"${dotgitdest}" && {
+      case "${dotgitdest}" in
+      *.sh) chmod a+x "${dotgitdest}" ;;
+      *) ;;
+      esac
       [ -s "${dotgitdiff}" ] && {
         cat "${dotgitdiff}" 1>|"${dotgitbkup}"
       } || :
@@ -329,6 +336,7 @@ _EOC_
     _verbose "Update '${dotgitdest}'."
   else
     : && {
+      [ -n "${dotgitdest}" ] &&
       _verbose "Copy from '${dotgittemp}' to '${dotgitdest}'."
       [ -s "${dotgitdiff}" ] &&
       _verbose "Copy from '${dotgitdiff}' to '${dotgitbkup}'."
