@@ -48,13 +48,13 @@
 	# core.excludesFile:
 	# Specifies the pathname to the file that contains patterns to
 	# describe paths that are not meant to be tracked, in addition
-	# to .gitignore (per-directory) and .git/info/exclude. 
+	# to .gitignore (per-directory) and .git/info/exclude.
 	excludesfile = ~/.config/git/ignore
 
 	# core.hooksPath:
 	# By default Git will look for your hooks in the $GIT_DIR/hooks
 	# directory. Set this to different path, e.g. /etc/git/hooks,
-	# and Git will try to find your hooks in that directory, 
+	# and Git will try to find your hooks in that directory,
 	# e.g. /etc/git/hooks/pre-receive instead of in
 	# $GIT_DIR/hooks/pre-receive.
 	# The path can be either absolute or relative. A relative path
@@ -136,7 +136,7 @@
 	# attribute to "auto" on all files and core.eol to "crlf". Set to
 	# true if you want to have CRLF line endings in your working
 	# directory and the repository has LF line endings. This variable
-	# can be set to input, in which case no output conversion is 
+	# can be set to input, in which case no output conversion is
 	# performed.
 	autocrlf = input
 
@@ -159,7 +159,7 @@
 	#  treats a tab character in the initial indent part of the line
 	#  as an error (not enabled by default).
 	# - blank-at-eof
-	#  treats blank lines added at the end of file as an error 
+	#  treats blank lines added at the end of file as an error
 	#  (enabled by default).
 	# - trailing-space
 	#  is a short-hand to cover both blank-at-eol and blank-at-eof.
@@ -211,9 +211,9 @@
 	#  push the current branch to update a branch with the same name
 	#  on the receiving end. Works in both central and non-central
 	#  workflows.
-	# - upstream 
+	# - upstream
 	#  push the current branch back to the branch whose changes are
-	#  usually integrated into the current branch (which is called 
+	#  usually integrated into the current branch (which is called
 	#  @{upstream}). This mode only makes sense if you are pushing to
 	#  the same repository you would normally pull from (i.e. central
 	#  workflow).
@@ -341,7 +341,7 @@
 	# The remote to push to by default. Overrides branch.<name>.remote for
 	# all branches, and is overridden by branch.<name>.pushRemote for
 	# specific branches.
-	#pushDefault = 
+	#pushDefault =
 
 [color]
 
@@ -372,7 +372,7 @@
 	# auto (or true), in which case colors are used only when the error
 	# output goes to a terminal. If unset, then the value of color.ui is
 	# used (auto by default).
-	advice = auto
+	#advice = auto
 
 	# color.branch:
 	# A boolean to enable/disable color in the output of git-branch[1]. May
@@ -386,28 +386,28 @@
 	# always, false (or never) or auto (or true), in which case colors are
 	# used only when the error output goes to a terminal. If unset, then
 	# the value of color.ui is used (auto by default).
-	push = auto
+	#push = auto
 
 	# color.remote:
 	# If set, keywords at the start of the line are highlighted. The
 	# keywords are "error", "warning", "hint" and "success", and are matched
 	# case-insensitively. May be set to always, false (or never) or auto (or
 	# true). If unset, then the value of color.ui is used (auto by default).
-	remote = auto
+	#remote = auto
 
 	# color.transport:
 	# A boolean to enable/disable color when pushes are rejected. May be set
 	# to always, false (or never) or auto (or true), in which case colors
 	# are used only when the error output goes to a terminal. If unset, then
 	# the value of color.ui is used (auto by default).
-	transport = true
+	#transport = true
 
 	# color.showBranch:
 	# A boolean to enable/disable color in the output of git-show-branch[1].
 	# May be set to always, false (or never) or auto (or true), in which
 	# case colors are used only when the output is to a terminal. If unset,
 	# then the value of color.ui is used (auto by default).
-	showBranch = auto
+	#showBranch = auto
 
 	# color.status:
 	# A boolean to enable/disable color in the output of git-status[1]. May
@@ -435,9 +435,9 @@
 	grep = auto
 
 	# color.pager:
-	# A boolean to enable/disable colored output when the pager is in use 
+	# A boolean to enable/disable colored output when the pager is in use
 	# (default is true).
-	pager = auto
+	#pager = auto
 
 [alias]
 
@@ -475,7 +475,7 @@
 
 	prune     = fetch --prune
 	undo      = reset --soft HEAD^
-	stash-all = stash save --include-untracked 
+	stash-all = stash save --include-untracked
 
 [include]
 
