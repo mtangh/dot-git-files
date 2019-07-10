@@ -6,31 +6,31 @@ THIS="${THIS:-update.sh}"
 BASE="${THIS%.*}"
 
 # dot-git-files URL
-DOT_GIT_URL="${DOT_GIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
+DOTGIT_URL="${DOTGIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
 
 # Apply-to dir.
-GITAPPLYDIR="${GIT_DIR:-}"
+GITAPLYDIR="${GIT_DIR:-}"
 
 # Flag: Git Project (0:auto,1:global,2:project,3:local)
-GITAPPLY_TO=0
+GITAPLY_TO=0
 
 # Flag: With config
-WITH_CONFIG=0
+WITHCONFIG=0
 
 # Flag: Debug
-MODE_DBGRUN=0
+MODEDBGRUN=0
 
 # Flag: dry-run
-MODE_DRYRUN=0
+MODEDRYRUN=0
 
 # Flag: Verbose output
-VERBOSE_OUT=0
+VERBOSEOUT=0
 
 # Debug
 [ "${DEBUG:-NO}" != "NO" ] && {
-  MODE_DBGRUN=1
-  MODE_DRYRUN=1
-  VERBOSE_OUT=1
+  MODEDBGRUN=1
+  MODEDRYRUN=1
+  VERBOSEOUT=1
 } || :
 
 # Variables
@@ -46,7 +46,7 @@ dotgit_out=""
 
 # Verbose
 _verbose() {
-  [ $VERBOSE_OUT -ne 0 ] && {
+  [ $VERBOSEOUT -ne 0 ] && {
     echo "${BASE}: $@"; }
   return 0
 }
@@ -65,25 +65,25 @@ while [ $# -gt 0 ]
 do
   case "$1" in
   -g|--global)
-    GITAPPLY_TO=1
+    GITAPLY_TO=1
     ;;
   -p|--project|--proj)
-    GITAPPLY_TO=2
+    GITAPLY_TO=2
     ;;
   -u|--local|--user-only)
-    GITAPPLY_TO=3
+    GITAPLY_TO=3
     ;;
   -c|--with-config)
-    WITH_CONFIG=1
+    WITHCONFIG=1
     ;;
   -C|--without-config)
-    WITH_CONFIG=0
+    WITHCONFIG=0
     ;;
   -D*|--debug*)
-    MODE_DBGRUN=1
+    MODEDBGRUN=1
     ;;
   -d*|--dry-run*)
-    MODE_DRYRUN=1
+    MODEDRYRUN=1
     ;;
   -*)
     echo "$THIS: ERROE: Illegal option '${1}'." 1>&2
@@ -99,15 +99,15 @@ done
 set -Cu
 
 # Enable trace, verbose
-[ $MODE_DBGRUN -eq 0 ] || {
+[ $MODEDBGRUN -eq 0 ] || {
   PS4='>(${BASH_SOURCE:-$THIS}:${LINENO:-0})${FUNCNAME:+:$FUNCNAME()}: '
   export PS4
   set -xv
 }
 
 # Verbose output
-[ $MODE_DRYRUN -ne 0 ] && {
-  VERBOSE_OUT=1
+[ $MODEDRYRUN -ne 0 ] && {
+  VERBOSEOUT=1
 } || :
 
 # File get command
@@ -134,54 +134,54 @@ dgcmd_diff="$(type -P diff 2>/dev/null)"
 }
 
 # Apply to
-case "${GITAPPLY_TO}" in
+case "${GITAPLY_TO}" in
 1)
-  [ -n "${GITAPPLYDIR}" ] ||
-  GITAPPLYDIR="${XDG_CONFIG_HOME:-$HOME/.config}/git"
-  [ -d "${GITAPPLYDIR}" ] ||
-  GITAPPLYDIR="${HOME}"
+  [ -n "${GITAPLYDIR}" ] ||
+  GITAPLYDIR="${XDG_CONFIG_HOME:-$HOME/.config}/git"
+  [ -d "${GITAPLYDIR}" ] ||
+  GITAPLYDIR="${HOME}"
   ;;
 2)
-  [ -n "${GITAPPLYDIR}"  ] ||
-  GITAPPLYDIR="$(pwd)"
-  if [ -n "${GITAPPLYDIR}" -a -d "${GITAPPLYDIR}/.git" ]
+  [ -n "${GITAPLYDIR}"  ] ||
+  GITAPLYDIR="$(pwd)"
+  if [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.git" ]
   then
-    GITAPPLYDIR="${GITAPPLYDIR}/.git"
+    GITAPLYDIR="${GITAPLYDIR}/.git"
   else
-    echo "$THIS: ERROR: '.git' no such directory in '${GITAPPLYDIR}'." 1>&2
+    echo "$THIS: ERROR: '.git' no such directory in '${GITAPLYDIR}'." 1>&2
     exit 1
   fi || :
   ;;
 3)
-  [ -n "${GITAPPLYDIR}"  ] ||
-  GITAPPLYDIR="$(pwd)"
-  if [ -n "${GITAPPLYDIR}" -a -d "${GITAPPLYDIR}/.git/info" ]
+  [ -n "${GITAPLYDIR}"  ] ||
+  GITAPLYDIR="$(pwd)"
+  if [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.git/info" ]
   then
-    GITAPPLYDIR="${GITAPPLYDIR}/.git/info"
+    GITAPLYDIR="${GITAPLYDIR}/.git/info"
   else
-    echo "$THIS: ERROR: '.git/info' no such directory in '${GITAPPLYDIR}'." 1>&2
+    echo "$THIS: ERROR: '.git/info' no such directory in '${GITAPLYDIR}'." 1>&2
     exit 1
   fi || :
   ;;
 *)
-  if [ -n "${GITAPPLYDIR}"  ]
+  if [ -n "${GITAPLYDIR}"  ]
   then
-    GITAPPLYDIR="$(pwd)"
+    GITAPLYDIR="$(pwd)"
   fi
-  if [ -n "${GITAPPLYDIR}" -a -d "${GITAPPLYDIR}/.git" ]
+  if [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.git" ]
   then
-    GITAPPLY_TO=2
-  elif [ -n "${GITAPPLYDIR}" -a -d "${GITAPPLYDIR}/.config/git" ]
+    GITAPLY_TO=2
+  elif [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.config/git" ]
   then
-    GITAPPLYDIR="${GITAPPLYDIR}/.config/git"
-    GITAPPLY_TO=1
+    GITAPLYDIR="${GITAPLYDIR}/.config/git"
+    GITAPLY_TO=1
   elif [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/git" ]
   then
-    GITAPPLYDIR="${XDG_CONFIG_HOME:-$HOME/.config}/git"
-    GITAPPLY_TO=1
+    GITAPLYDIR="${XDG_CONFIG_HOME:-$HOME/.config}/git"
+    GITAPLY_TO=1
   else
-    GITAPPLYDIR="${HOME}"
-    GITAPPLY_TO=1
+    GITAPLYDIR="${HOME}"
+    GITAPLY_TO=1
   fi
   ;;
 esac
@@ -199,7 +199,7 @@ esac
 
 # Process files
 for dotgitfile in $(
-  [ $WITH_CONFIG -ne 0 -a $GITAPPLY_TO -le 1 ] && {
+  [ $WITHCONFIG -ne 0 -a $GITAPLY_TO -le 1 ] && {
     cat <<_LIST_
 gitconfig:-
 gitconfig.local.tmplt:-
@@ -222,7 +222,7 @@ do
   [ -n "${dotgitckey}" ] &&
   dotgitfile="${dotgitfile%%:*}"
 
-  dotgit_url="${DOT_GIT_URL}/${dotgitfile}"
+  dotgit_url="${DOTGIT_URL}/${dotgitfile}"
   dotgittemp="${dotgitwdir}/${dotgitfile}"
   dotgitdiff="${dotgitwdir}/${dotgitfile}.patch"
   dotgitbkup=""
@@ -230,42 +230,42 @@ do
 
   dotgitdest=""
 
-  if [ $GITAPPLY_TO -ne 2 ] &&
+  if [ $GITAPLY_TO -ne 2 ] &&
      [ -n "${dotgitckey}" -a "${dotgitckey}" != "-" ]
   then
 
-    if [ $GITAPPLY_TO -eq 3 ]
+    if [ $GITAPLY_TO -eq 3 ]
     then dotgitckey="--local ${dotgitckey}"
     else dotgitckey="--global ${dotgitckey}"
     fi
 
     eval "dotgitdest=$(git config ${dotgitckey})"
 
-  fi # if [ $GITAPPLY_TO -ne 2 ] && ...
+  fi # if [ $GITAPLY_TO -ne 2 ] && ...
 
   if [ -z "${dotgitdest}" ]
   then
 
-    dotgitdest="${GITAPPLYDIR}/${dotgitfile}"
+    dotgitdest="${GITAPLYDIR}/${dotgitfile}"
 
-    case "${GITAPPLY_TO}::${dotgitdest}" in
+    case "${GITAPLY_TO}::${dotgitdest}" in
     3::*/.git/info/*.sh)
       dotgitdest=""
       ;;
     3::*/.git/info/*ignore)
-      dotgitdest="${GITAPPLYDIR}/excludes"
+      dotgitdest="${GITAPLYDIR}/excludes"
       ;;
-    {0,1}::*/.config/git/*.sh)
-      dotgitdest="${GITAPPLYDIR}/${dotgitfile}"
+    [01]::*/.config/git/*.sh)
+      dotgitdest="${GITAPLYDIR}/${dotgitfile}"
       ;;
-    {0,1,3}::*/{.config/git,.git/info}/git*)
-      dotgitdest="${GITAPPLYDIR}/${dotgitfile#*git}"
+    [01]::*/.config/git/git*|3::*/.git/info/git*)
+      dotgitdest="${GITAPLYDIR}/${dotgitfile#*git}"
       ;;
-    {0,1,3}::*/{.config/git,.git/info}/*)
-      dotgitdest="${GITAPPLYDIR}/${dotgitfile}"
+    [01]::*/.config/git/*|3::*/.git/info/*)
+      dotgitdest="${GITAPLYDIR}/${dotgitfile}"
       ;;
     *)
-      dotgitdest="${GITAPPLYDIR}/.${dotgitfile}"
+      dotgitdest="${GITAPLYDIR}/.${dotgitfile}"
       ;;
     esac
 
@@ -276,7 +276,7 @@ do
   [ -n "$dotgittemp" ] || continue
   [ -n "$dotgitdest" ] || continue
 
-  ${dgcmd_fget} "${dotgit_url}" 1>|"${dotgittemp}"
+  ${dgcmd_fget} "${dotgit_url}" 1>|"${dotgittemp}" 2>/dev/null
 
   additlines=$(
     : && {
@@ -320,7 +320,7 @@ _EOC_
     dotgitbkup="${dotgitdest}-$(date +'%Y%m%dT%H%M%S').patch"
   }
 
-  if [ $MODE_DRYRUN -eq 0 ]
+  if [ $MODEDRYRUN -eq 0 ]
   then
     cat "${dotgittemp}" 1>|"${dotgitdest}" && {
       [ -s "${dotgitdiff}" ] && {
@@ -340,7 +340,7 @@ _EOC_
   else dotgit_out="${dotgitdest}"
   fi || :
 
-  if [ $MODE_DRYRUN -ne 0 ]
+  if [ $MODEDRYRUN -ne 0 ]
   then
     [ -n "${dotgitdiff}" -a -s "${dotgitdiff}" ] &&
     dotgit_out="${dotgitdiff}" ||
@@ -349,7 +349,7 @@ _EOC_
 
   echo "${dotgit_out##*/} >>>"
 
-  dotgitline=$(cat "${dotgit_out}" |wc -l)
+  dotgitline=$(cat "${dotgit_out}" 2>/dev/null |wc -l)
 
   cat -n "${dotgit_out}" |
   if [ $dotgitline -gt 10 ]
@@ -359,7 +359,7 @@ _EOC_
 
   echo
 
-done #2>/dev/null
+done
 
 # End
 exit 0
