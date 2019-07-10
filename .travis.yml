@@ -24,7 +24,7 @@ script:
     : "Run with -g" && {
       rm -rf "${gitconf_dir}" || :
       mkdir -p "${gitconf_dir}" &&
-      bash -x -- update.sh -g &&
+      bash -x -- gitfilesupdate.sh -v -g &&
       [   -r "${gitconf_dir}/ignore" ] &&
       [   -r "${gitconf_dir}/attributes" ] &&
       [   -x "${gitconf_dir}/gitfilesupdate.sh" ] &&
@@ -36,7 +36,7 @@ script:
     : "Run with -g and -c" && {
       rm -rf "${gitconf_dir}" || :
       mkdir -p "${gitconf_dir}" &&
-      bash -x -- update.sh -g -c &&
+      bash -x -- gitfilesupdate.sh -v -g -c &&
       [ -r "${gitconf_dir}/ignore" ] &&
       [ -r "${gitconf_dir}/attributes" ] &&
       [ -x "${gitconf_dir}/gitfilesupdate.sh" ] &&

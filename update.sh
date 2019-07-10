@@ -229,7 +229,7 @@ do
   dotgit_out=""
 
   dotgitdest=""
-  
+
   if [ $GITAPPLY_TO -ne 2 ] &&
      [ -n "${dotgitckey}" -a "${dotgitckey}" != "-" ]
   then
@@ -346,7 +346,7 @@ _EOC_
     dotgit_out="${dotgitdiff}" ||
     dotgit_out="${dotgittemp}"
   fi || :
-  
+
   echo "${dotgit_out##*/} >>>"
 
   dotgitline=$(cat "${dotgit_out}" |wc -l)
@@ -359,7 +359,7 @@ _EOC_
 
   echo
 
-done 2>|/dev/null
+done 2>/dev/null
 
 # End
 exit 0
