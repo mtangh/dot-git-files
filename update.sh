@@ -90,7 +90,7 @@ do
     DRY_RUN_ON=1
     ;;
   -*)
-    _echo "ERROE: Illegal option '${1}'." 1>&2
+    _echo "ERROR: Illegal option '${1}'." 1>&2
     exit 1
     ;;
   *)
