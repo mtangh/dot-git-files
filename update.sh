@@ -17,21 +17,21 @@ GITAPLY_TO=0
 # Flag: With config
 WITHCONFIG=0
 
-# Flag: Debug
-MODEDBGRUN=0
+# Flag: Xtrace
+X_TRACE_ON=0
 
 # Flag: dry-run
-MODEDRYRUN=0
-
-# Flag: Verbose output
-VERBOSEOUT=0
+DRY_RUN_ON=0
 
 # Debug
-[ "${DEBUG:-NO}" != "NO" ] && {
-  MODEDBGRUN=1
-  MODEDRYRUN=1
-  VERBOSEOUT=1
-} || :
+case "${DEBUG:-NO}" in
+0|[Nn][Oo]|[Oo][Ff][Ff])
+  ;;
+*)
+  X_TRACE_ON=1
+  DRY_RUN_ON=1
+  ;;
+esac || :
 
 # Variables
 dotgitfile=""
@@ -44,18 +44,16 @@ dotgitdiff=""
 dotgitbkup=""
 dotgit_out=""
 
-# Verbose
-_verbose() {
-  [ $VERBOSEOUT -ne 0 ] && {
-    echo "${BASE}: $@"; }
+# Echo
+_echo() {
+  echo "$THIS: $@"
   return 0
 }
 
+# Cleanup
 _cleanup() {
-  _verbose "cleanup."
-  [ -z "${dotgitwdir}" ] && {
-    rm -rf "${dotgitwdir}" 1>/dev/null 2>&1 &&
-    _verbose "removed: '${dotgitwdir}'."
+  [ -z "${dotgitwdir}" ] || {
+    rm -rf "${dotgitwdir}" 1>/dev/null 2>&1
   } || :
   return 0
 }
@@ -65,13 +63,19 @@ while [ $# -gt 0 ]
 do
   case "$1" in
   -g|--global)
-    GITAPLY_TO=1
+    [ $GITAPLY_TO -eq 0 ] && {
+      GITAPLY_TO=1
+    }
     ;;
   -p|--project|--proj)
-    GITAPLY_TO=2
+    [ $GITAPLY_TO -eq 0 ] && {
+      GITAPLY_TO=2
+    }
     ;;
   -u|--local|--user-only)
-    GITAPLY_TO=3
+    [ $GITAPLY_TO -eq 0 ] && {
+      GITAPLY_TO=3
+    }
     ;;
   -c|--with-config)
     WITHCONFIG=1
@@ -79,14 +83,14 @@ do
   -C|--without-config)
     WITHCONFIG=0
     ;;
-  -D*|--debug*)
-    MODEDBGRUN=1
+  -D*|-debug*|--debug*)
+    X_TRACE_ON=1
     ;;
-  -d*|--dry-run*)
-    MODEDRYRUN=1
+  -n*|-dry-run*|--dry-run*)
+    DRY_RUN_ON=1
     ;;
   -*)
-    echo "$THIS: ERROE: Illegal option '${1}'." 1>&2
+    _echo "ERROE: Illegal option '${1}'." 1>&2
     exit 1
     ;;
   *)
@@ -99,16 +103,11 @@ done
 set -Cu
 
 # Enable trace, verbose
-[ $MODEDBGRUN -eq 0 ] || {
+[ $X_TRACE_ON -eq 0 ] || {
   PS4='>(${BASH_SOURCE:-$THIS}:${LINENO:-0})${FUNCNAME:+:$FUNCNAME()}: '
   export PS4
   set -xv
 }
-
-# Verbose output
-[ $MODEDRYRUN -ne 0 ] && {
-  VERBOSEOUT=1
-} || :
 
 # File get command
 dgcmd_fget=""
@@ -119,7 +118,7 @@ dgcmd_fget="$(type -P curl) -sL"
 [ -n "$(type -P wget 2>/dev/null)" ] &&
 dgcmd_fget="$(type -P wget) -qO -"
 [ -z "${dgcmd_fget}" ] && {
-  echo "$THIS: ERROR: Command (curl or wget) not found." 1>&2
+  _echo "ERROR: Command (curl or wget) not found." 1>&2
   exit 1
 }
 
@@ -129,7 +128,7 @@ dgcmd_diff=""
 [ -n "$(type -P diff 2>/dev/null)" ] &&
 dgcmd_diff="$(type -P diff 2>/dev/null)"
 [ -z "${dgcmd_diff}" ] && {
-  echo "$THIS: ERROR: Command (diff) not found." 1>&2
+  _echo "ERROR: Command (diff) not found." 1>&2
   exit 1
 }
 
@@ -192,23 +191,22 @@ esac
 
 # Create a work-dir if not exists
 [ -d "$dotgitwdir" ] || {
-  mkdir -p "$dotgitwdir"
-} 1>/dev/null 2>&1 || :
+  mkdir -p "$dotgitwdir" 1>/dev/null 2>&1
+} || :
 
 # Set trap
-[ -d "${dotgitwdir}" ] && {
-  trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
-  trap "_cleanup" EXIT
-}
+trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
+trap "_cleanup" EXIT
 
 # Process files
 for dotgitfile in $(
-  [ $WITHCONFIG -ne 0 -a $GITAPLY_TO -le 1 ] && {
+  if [ $WITHCONFIG -ne 0 -a $GITAPLY_TO -le 1 ]
+  then
     cat <<_LIST_
 gitconfig:-
 gitconfig.local.tmplt:-
 _LIST_
-  } || :
+  fi || :
   cat <<_LIST_
 gitattributes:core.attributesfile
 gitignore:core.excludesfile
@@ -234,7 +232,7 @@ do
 
   dotgitdest=""
 
-  if [ $GITAPLY_TO -ne 2 ] &&
+  if [ $GITAPLY_TO -ne 2 -a ] &&
      [ -n "${dotgitckey}" -a "${dotgitckey}" != "-" ]
   then
 
@@ -292,8 +290,12 @@ do
       }
     } 2>/dev/null |wc -l; )
 
-  [ ${additlines:-0} -gt 0 ] && {
-    [ -d "${dotgitdest}.d" ] && {
+  if [ ${additlines:-0} -gt 0 ]
+  then
+
+    _echo "Found '${dotgitdest}.d', ${additlines} lines."
+
+    : && {
       cat <<_EOC_
 
 #
@@ -301,13 +303,15 @@ do
 #
 
 _EOC_
-      cat "${dotgitdest}.d"/*.conf
+      cat "${dotgitdest}.d"/*.conf 2>/dev/null
       cat <<_EOC_
 
 # End of '${dotgitdest##*/}.d'
 _EOC_
-    }
-  } 1>>"${dotgittemp}" || :
+    } 1>>"${dotgittemp}"
+
+  else :
+  fi || :
 
   if [ ! -s "${dotgittemp}" ]
   then
@@ -317,48 +321,48 @@ _EOC_
   if [ -e "${dotgitdest}" ]
   then
     ${dgcmd_diff} -u "${dotgittemp}" "${dotgitdest}" 1>|"${dotgitdiff}" && {
-      _verbose "Same '${dotgittemp}' and '${dotgitdest}'."
+      _echo "Same '${dotgittemp}' and '${dotgitdest}'."
       continue
     }
   fi
 
-  [ -n "${dotgitdiff}" -a -s "${dotgitdiff}" ] && {
-    dotgitbkup="${dotgitdest}-$(date +'%Y%m%dT%H%M%S').patch"
-  }
-
-  if [ $MODEDRYRUN -eq 0 ]
+  if [ $DRY_RUN_ON -eq 0 ]
   then
+
     cat "${dotgittemp}" 1>|"${dotgitdest}" && {
       case "${dotgitdest}" in
       *.sh) chmod a+x "${dotgitdest}" ;;
       *) ;;
-      esac
-      [ $GITAPLY_TO -le 1 ] &&
-      [ -s "${dotgitdiff}" ] && {
+      esac || :
+      [ $GITAPLY_TO -le 1 -a -s "${dotgitdiff}" ] && {
+        dotgitbkup="${dotgitdest}-$(date +'%Y%m%dT%H%M%S').patch"
         cat "${dotgitdiff}" 1>|"${dotgitbkup}"
       } || :
     } &&
-    _verbose "Update '${dotgitdest}'."
+    _echo "Update '${dotgitdest}'." && {
+      dotgit_out=$(
+        if [ -n "${dotgitbkup}" -a -s "${dotgitbkup}" ]
+        then echo "${dotgitbkup}"
+        else echo "${dotgitdest}"
+        fi || :; )
+    }
+
   else
+
     : && {
       [ -n "${dotgitdest}" ] &&
-      _verbose "Copy from '${dotgittemp}' to '${dotgitdest}'."
+      _echo "Copy from '${dotgittemp}' to '${dotgitdest}'."
       [ -s "${dotgitdiff}" ] &&
-      _verbose "Copy from '${dotgitdiff}' to '${dotgitbkup}'."
+      _echo "Copy from '${dotgitdiff}' to '${dotgitbkup}'."
     } || :
+
+    dotgit_out=$(
+      if [ -n "${dotgitdiff}" -a -s "${dotgitdiff}" ]
+      then echo "${dotgitdiff}"
+      else echo "${dotgittemp}"
+      fi || :; )
+
   fi || continue
-
-  if [ -n "${dotgitbkup}" -a -s "${dotgitbkup}" ]
-  then dotgit_out="${dotgitbkup}"
-  else dotgit_out="${dotgitdest}"
-  fi || :
-
-  if [ $MODEDRYRUN -ne 0 ]
-  then
-    [ -n "${dotgitdiff}" -a -s "${dotgitdiff}" ] &&
-    dotgit_out="${dotgitdiff}" ||
-    dotgit_out="${dotgittemp}"
-  fi || :
 
   echo "${dotgit_out##*/} >>>"
 
