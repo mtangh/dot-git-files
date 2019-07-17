@@ -171,7 +171,8 @@ case "${GITAPLY_TO}" in
   fi
   if [ -n "${GITAPLYDIR}" -a \
        -f "${GITAPLYDIR}/.git/config" -a \
-       -d "${GITAPLYDIR}/.git/info" ]
+       -d "${GITAPLYDIR}/.git/objects" -a \
+       -d "${GITAPLYDIR}/.git/refs" ]
   then
     GITAPLY_TO=2
   elif [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.config/git" ]
