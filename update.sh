@@ -203,14 +203,9 @@ trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
 trap "_cleanup" EXIT
 
 # git/info
-case "${GITAPLY_TO}" in
-3)
-  [ -d "${GITAPLYDIR}" ] || {
-    mkdir -p "${GITAPLYDIR}"
-  } 1>/dev/null 2>&1
-*)
-  ;;
-esac
+if [ "${GITAPLY_TO}" = "3" -a ! -d "${GITAPLYDIR}" ]
+then mkdir -p "${GITAPLYDIR}"
+fi 1>/dev/null 2>&1
 
 # Process files
 for dotgitfile in $(
