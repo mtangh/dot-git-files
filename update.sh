@@ -330,7 +330,7 @@ _EOC_
   if [ -e "${dotgitdest}" ]
   then
     ${dgcmd_diff} -u "${dotgittemp}" "${dotgitdest}" 1>|"${dotgitdiff}" && {
-      _echo "Same '${dotgittemp}' and '${dotgitdest}'."
+      _echo "Same '${dotgittemp##*/}' and '${dotgitdest}'."
       continue
     }
   fi
