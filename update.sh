@@ -156,11 +156,14 @@ case "${GITAPLY_TO}" in
   then
     GITAPLYDIR="$(pwd)"
   fi
-  if [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.git/info" ]
+  if [ -n "${GITAPLYDIR}" -a \
+       -f "${GITAPLYDIR}/.git/config" -a \
+       -d "${GITAPLYDIR}/.git/objects" -a \
+       -d "${GITAPLYDIR}/.git/refs" ]
   then
     GITAPLYDIR="${GITAPLYDIR}/.git/info"
   else
-    echo "$THIS: ERROR: '.git/info' no such directory in '${GITAPLYDIR}'." 1>&2
+    echo "$THIS: ERROR: '.git' no such directory in '${GITAPLYDIR}'." 1>&2
     exit 1
   fi || :
   ;;
@@ -198,6 +201,16 @@ esac
 # Set trap
 trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
 trap "_cleanup" EXIT
+
+# git/info
+case "${GITAPLY_TO}" in
+3)
+  [ -d "${GITAPLYDIR}" ] || {
+    mkdir -p "${GITAPLYDIR}"
+  } 1>/dev/null 2>&1
+*)
+  ;;
+esac
 
 # Process files
 for dotgitfile in $(
