@@ -232,7 +232,7 @@ do
 
   dotgitdest=""
 
-  if [ $GITAPLY_TO -ne 2 -a ] &&
+  if [ $GITAPLY_TO -ne 2 ] &&
      [ -n "${dotgitckey}" -a "${dotgitckey}" != "-" ]
   then
 
