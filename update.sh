@@ -58,6 +58,32 @@ _cleanup() {
   return 0
 }
 
+# Template
+_template() {
+  local filepath="$1"
+  local git_user="${GIT_USER_NAME:-}"
+  local gitemail="${GIT_USER_EMAIL:-}"
+  [ -r "${filepath}" ] &&
+  case "${filepath##*.}" in
+  tmpl|tmplt)
+    [ -z "${filepath%.*}" -o -e "${filepath%.*}" ] && {
+      return 0
+    } || :
+    [ -n "${git_user}" ] ||
+    git_user="$(uname -un 2>/dev/null)"
+    [ -n "${git_user}" ] ||
+    gitemail="$(uname -un 2>/dev/null)@$(hostname -f 2>/dev/null)"
+    cat "${filepath}" |sed -e \
+      's/^\([ \t]*name[ ]*=[ ]*\)gituser$/'"$git_user"'/g' \
+      's/^\([ \t]*email[ ]*=[ ]*\)gituser$/'"$gitemail"'/g' \
+      1>|"${filepath%.*}"
+    ;;
+  *)
+    ;;
+  esac || :
+  return $?
+}
+
 # Parsing command line options
 while [ $# -gt 0 ]
 do
@@ -145,7 +171,10 @@ case "${GITAPLY_TO}" in
   then
     GITAPLYDIR="$(pwd)"
   fi
-  if [ -z "${GITAPLYDIR}" -o ! -d "${GITAPLYDIR}/.git" ]
+  if [ -z "${GITAPLYDIR}" -o \
+     ! -f "${GITAPLYDIR}/.git/config" -o \
+     ! -d "${GITAPLYDIR}/.git/objects" -o \
+     ! -d "${GITAPLYDIR}/.git/refs" ]
   then
     echo "$THIS: ERROR: '.git' no such directory in '${GITAPLYDIR}'." 1>&2
     exit 1
@@ -349,11 +378,15 @@ _EOC_
       } || :
     } &&
     _echo "Update '${dotgitdest}'." && {
+
       dotgit_out=$(
         if [ -n "${dotgitbkup}" -a -s "${dotgitbkup}" ]
         then echo "${dotgitbkup}"
         else echo "${dotgitdest}"
         fi || :; )
+
+      _template "${dotgitdest}" || :
+
     }
 
   else
