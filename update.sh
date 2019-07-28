@@ -50,6 +50,19 @@ _echo() {
   return 0
 }
 
+# Abort
+_abort() {
+  local exitcode=1
+  case "$1" in
+  [0-9]|[1-9][0-9]|[1-9][0-9][0-9])
+    exitcode="$1"; shift ;;
+  *)
+    ;;
+  esac
+  _echo "ERROR: $@ (${exitcode:-1})" 1>&2
+  exit ${exitcode:-1}
+}
+
 # Cleanup
 _cleanup() {
   [ -z "${dotgitwdir}" ] || {
@@ -115,11 +128,17 @@ do
   -n*|-dry-run*|--dry-run*)
     DRY_RUN_ON=1
     ;;
+  -h|-help*|--help*)
+    cat <<_USAGE_
+Usage: $THIS [--global|--project|--local] [--with-config|--without-config]
+
+_USAGE_
+    ;;
   -*)
-    _echo "ERROR: Illegal option '${1}'." 1>&2
-    exit 1
+    _abort 22 "Illegal option '${1}'."
     ;;
   *)
+    _abort 22 "Illegal argument '${1}'."
     ;;
   esac
   shift
@@ -144,8 +163,7 @@ dgcmd_fget="$(type -P curl) -sL"
 [ -n "$(type -P wget 2>/dev/null)" ] &&
 dgcmd_fget="$(type -P wget) -qO -"
 [ -z "${dgcmd_fget}" ] && {
-  _echo "ERROR: Command (curl or wget) not found." 1>&2
-  exit 1
+  _anort 1 "Command (curl or wget) not found."
 }
 
 # Diff command
@@ -154,8 +172,7 @@ dgcmd_diff=""
 [ -n "$(type -P diff 2>/dev/null)" ] &&
 dgcmd_diff="$(type -P diff 2>/dev/null)"
 [ -z "${dgcmd_diff}" ] && {
-  _echo "ERROR: Command (diff) not found." 1>&2
-  exit 1
+  _abort 1 "Command (diff) not found."
 }
 
 # Apply to
@@ -176,8 +193,7 @@ case "${GITAPLY_TO}" in
      ! -d "${GITAPLYDIR}/.git/objects" -o \
      ! -d "${GITAPLYDIR}/.git/refs" ]
   then
-    echo "$THIS: ERROR: '.git' no such directory in '${GITAPLYDIR}'." 1>&2
-    exit 1
+    _abort 2 "'.git' no such directory in '${GITAPLYDIR}'."
   fi || :
   ;;
 3)
@@ -192,8 +208,7 @@ case "${GITAPLY_TO}" in
   then
     GITAPLYDIR="${GITAPLYDIR}/.git/info"
   else
-    echo "$THIS: ERROR: '.git' no such directory in '${GITAPLYDIR}'." 1>&2
-    exit 1
+    _abort 2 "'.git' no such directory in '${GITAPLYDIR}'."
   fi || :
   ;;
 *)
@@ -322,15 +337,42 @@ do
   }
 
   additlines=$(
-    : && {
-      [ -d "${dotgitdest}.d" ] && {
-        cat "${dotgitdest}.d"/*.conf
-      }
-    } 2>/dev/null |wc -l; )
+    [ -f "${dotgitdest}.proj" ] && {
+      cat "${dotgitdest}.proj" |egrep -v '^[ ]*#' |
+    } 2>/dev/null |wc -l )
 
   if [ ${additlines:-0} -gt 0 ]
   then
 
+    _echo "Found '${dotgitdest}.proj', ${additlines} lines."
+
+    : && {
+      cat <<_EOC_
+
+#
+# ${dotgitdest##*/}.proj
+#
+
+_EOC_
+      cat "${dotgitdest}.proj" 2>/dev/null
+      cat <<_EOC_
+
+# End of '${dotgitdest##*/}.proj'
+
+_EOC_
+    } 1>>"${dotgittemp}"
+  
+  else :
+  fi || :
+
+  additlines=$(
+    [ -d "${dotgitdest}.d" ] && {
+      cat "${dotgitdest}.d"/*.conf |egrep -v '^[ ]*#' |
+    } 2>/dev/null |wc -l )
+
+  if [ ${additlines:-0} -gt 0 ]
+  then
+      
     _echo "Found '${dotgitdest}.d', ${additlines} lines."
 
     : && {
@@ -345,6 +387,7 @@ _EOC_
       cat <<_EOC_
 
 # End of '${dotgitdest##*/}.d'
+
 _EOC_
     } 1>>"${dotgittemp}"
 
