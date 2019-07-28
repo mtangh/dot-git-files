@@ -338,7 +338,7 @@ do
 
   additlines=$(
     [ -f "${dotgitdest}.proj" ] && {
-      cat "${dotgitdest}.proj" |egrep -v '^[ ]*#' |
+      cat "${dotgitdest}.proj"
     } 2>/dev/null |wc -l )
 
   if [ ${additlines:-0} -gt 0 ]
@@ -357,8 +357,6 @@ _EOC_
       cat "${dotgitdest}.proj" 2>/dev/null
       cat <<_EOC_
 
-# End of '${dotgitdest##*/}.proj'
-
 _EOC_
     } 1>>"${dotgittemp}"
   
@@ -367,7 +365,7 @@ _EOC_
 
   additlines=$(
     [ -d "${dotgitdest}.d" ] && {
-      cat "${dotgitdest}.d"/*.conf |egrep -v '^[ ]*#' |
+      cat "${dotgitdest}.d"/*.conf
     } 2>/dev/null |wc -l )
 
   if [ ${additlines:-0} -gt 0 ]
@@ -385,8 +383,6 @@ _EOC_
 _EOC_
       cat "${dotgitdest}.d"/*.conf 2>/dev/null
       cat <<_EOC_
-
-# End of '${dotgitdest##*/}.d'
 
 _EOC_
     } 1>>"${dotgittemp}"
