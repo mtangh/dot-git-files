@@ -1,12 +1,14 @@
 #!/bin/bash
-THIS="${0##*/}"
-CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
-# Name
-THIS="${THIS:-update.sh}"
-BASE="${THIS%.*}"
+THIS="${BASH_SOURCE##*/}"
+NAME="${THIS%.*}"
+CDIR=$(cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
 
 # dot-git-files URL
 DOTGIT_URL="${DOTGIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
+
+# dot-ssh-files name
+DOTGIT_PRJ="${DOTGIT_URL%/master*}"
+DOTGIT_PRJ="${DOTGIT_PRJ##*/}"
 
 # Apply-to dir.
 GITAPLYDIR="${GIT_DIR:-}"
@@ -38,29 +40,29 @@ dotgitfile=""
 dotgitckey=""
 dotgitdest=""
 dotgit_url=""
-dotgitwdir="${TMPDIR:-/tmp}/.dot-git-files.$$"
+dotgitwdir="${TMPDIR:-/tmp}/.${DOTGIT_PRJ}.$$"
 dotgittemp=""
 dotgitdiff=""
 dotgitbkup=""
 dotgit_out=""
 
-# Echo
-_echo() {
-  echo "$THIS: $@"
+# Stdout
+_stdout() {
+  local row_data=""
+  cat | while IFS= read row_data
+  do printf "$THIS: %s" "${row_data}"; echo; done
   return 0
 }
 
 # Abort
 _abort() {
-  local exitcode=1
-  case "$1" in
-  [0-9]|[1-9][0-9]|[1-9][0-9][0-9])
-    exitcode="$1"; shift ;;
-  *)
-    ;;
-  esac
-  _echo "ERROR: $@ (${exitcode:-1})" 1>&2
-  exit ${exitcode:-1}
+  local exitcode=1 &>/dev/null
+  [[ ${1} =~ ^[0-9]+$ ]] && {
+    exitcode="$1"; shift;
+  } &>/dev/null
+  echo "ERROR: $@" "(${exitcode:-1})" |_stdout 1>&2
+  [ ${exitcode:-1} -gt 0 ] || exit ${exitcode:-1}
+  return 0
 }
 
 # Cleanup
@@ -144,12 +146,15 @@ _USAGE_
   shift
 done
 
+# Redirect to filter
+exec 1> >(_stdout)
+
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
 
 # Enable trace, verbose
 [ $X_TRACE_ON -eq 0 ] || {
-  PS4='>(${BASH_SOURCE:-$THIS}:${LINENO:-0})${FUNCNAME:+:$FUNCNAME()}: '
+  PS4='>(${THIS}:${LINENO:-0})${FUNCNAME:+:$FUNCNAME()}: '
   export PS4
   set -xv
 }
@@ -344,7 +349,7 @@ do
   if [ ${additlines:-0} -gt 0 ]
   then
 
-    _echo "Found '${dotgitdest}.proj', ${additlines} lines."
+    echo "Found '${dotgitdest}.proj', ${additlines} lines."
 
     : && {
       cat <<_EOC_
@@ -359,7 +364,7 @@ _EOC_
 
 _EOC_
     } 1>>"${dotgittemp}"
-  
+
   else :
   fi || :
 
@@ -370,8 +375,8 @@ _EOC_
 
   if [ ${additlines:-0} -gt 0 ]
   then
-      
-    _echo "Found '${dotgitdest}.d', ${additlines} lines."
+
+    echo "Found '${dotgitdest}.d', ${additlines} lines."
 
     : && {
       cat <<_EOC_
@@ -398,7 +403,7 @@ _EOC_
   if [ -e "${dotgitdest}" ]
   then
     ${dgcmd_diff} -u "${dotgittemp}" "${dotgitdest}" 1>|"${dotgitdiff}" && {
-      _echo "Same '${dotgittemp##*/}' and '${dotgitdest}'."
+      echo "Same '${dotgittemp##*/}' and '${dotgitdest}'."
       continue
     }
   fi
@@ -416,7 +421,7 @@ _EOC_
         cat "${dotgitdiff}" 1>|"${dotgitbkup}"
       } || :
     } &&
-    _echo "Update '${dotgitdest}'." && {
+    echo "Update '${dotgitdest}'." && {
 
       dotgit_out=$(
         if [ -n "${dotgitbkup}" -a -s "${dotgitbkup}" ]
@@ -432,9 +437,9 @@ _EOC_
 
     : && {
       [ -n "${dotgitdest}" ] &&
-      _echo "Copy from '${dotgittemp}' to '${dotgitdest}'."
+      echo "Copy from '${dotgittemp}' to '${dotgitdest}'."
       [ -s "${dotgitdiff}" ] &&
-      _echo "Copy from '${dotgitdiff}' to '${dotgitbkup}'."
+      echo "Copy from '${dotgitdiff}' to '${dotgitbkup}'."
     } || :
 
     dotgit_out=$(
