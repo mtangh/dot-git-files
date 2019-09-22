@@ -1,7 +1,7 @@
 #!/bin/bash
 THIS="${BASH_SOURCE##*/}"
 NAME="${THIS%.*}"
-CDIR=$(cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
+CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
 
 # dot-git-files URL
 DOTGIT_URL="${DOTGIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
@@ -50,7 +50,7 @@ dotgit_out=""
 _stdout() {
   local row_data=""
   cat | while IFS= read row_data
-  do printf "$THIS: %s" "${row_data}"; echo; done
+  do printf "${THIS:-${DOTGIT_PRJ}/update.sh}: %s" "${row_data}"; echo; done
   return 0
 }
 
@@ -132,7 +132,7 @@ do
     ;;
   -h|-help*|--help*)
     cat <<_USAGE_
-Usage: $THIS [--global|--project|--local] [--with-config|--without-config]
+Usage: ${THIS:-${DOTGIT_PRJ}/update.sh} [--global|--project|--local] [--with-config|--without-config]
 
 _USAGE_
     ;;
@@ -147,14 +147,14 @@ _USAGE_
 done
 
 # Redirect to filter
-exec 1> >(_stdout)
+exec 1> >(_stdout 2>/dev/null)
 
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
 
 # Enable trace, verbose
 [ $X_TRACE_ON -eq 0 ] || {
-  PS4='>(${THIS}:${LINENO:-0})${FUNCNAME:+:$FUNCNAME()}: '
+  PS4='>(${THIS:-${DOTGIT_PRJ}/update.sh}:${LINENO:--})${FUNCNAME:+:$FUNCNAME()}: '
   export PS4
   set -xv
 }

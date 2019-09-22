@@ -1,15 +1,13 @@
 #!/bin/bash
-THIS="${0##*/}"
-CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
-# Name
-THIS="${THIS:-gitkeep.sh}"
-BASE="${THIS%.*}"
+THIS="${BASH_SOURCE##*/}"
+NAME="${THIS%.*}"
+CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
 
 # Base directories.
 basedirs=""
 
 # Tag file
-_tagname=".${BASE}"
+_tagname=".${NAME}"
 
 # Flags
 _rebuild=0
@@ -54,8 +52,8 @@ _get_dir_list() {
 # Echo
 _echo() {
   [ ${_quietly} -eq 0 ] && {
-    echo "${BASE}: $@"
-  } || :
+    echo "${NAME}: $@"
+  } 2>/dev/null || :
   return 0
 }
 
@@ -91,8 +89,8 @@ do
       # Base dir
       basedirs="${basedirs}${1}\n"
     else
-      echo "${BASE}: no such directory '${1}'." 1>&2
-      exit 1
+      echo "${THIS}: '${1}': no such file or directory." 1>&2
+      exit 2
     fi
     ;;
   esac
@@ -115,7 +113,7 @@ basedirs="${basedirs:-.\n}"
 
 # Tag name
 [ -n "${_tagname}" ] && {
-  _tagname=".${BASE}"
+  _tagname=".${NAME}"
 } || :
 echo "${_tagname}" |
 egrep '^[.].+' 1>/dev/null 2>&1 || {
@@ -157,13 +155,13 @@ keep_dir=""
 
 # Process dirs
 _get_dir_list |
-while read base_dir
+while IFS= read base_dir
 do
 
   _echo "Gitkeep directory '$base_dir'."
 
   find "$base_dir" -type d |sort -u |
-  while read keep_dir
+  while IFS= read keep_dir
   do
 
     _verbose "#1 Check dir '${keep_dir}'"
@@ -192,7 +190,7 @@ do
 
   done
 
-done 2>/dev/null
+done
 
 # End
 exit 0
