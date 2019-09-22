@@ -155,25 +155,25 @@ keep_dir=""
 
 # Process dirs
 _get_dir_list |
-while IFS= read base_dir
+while read base_dir
 do
 
   _echo "Gitkeep directory '$base_dir'."
 
   find "$base_dir" -type d |sort -u |
-  while IFS= read keep_dir
+  while read keep_dir
   do
 
     _verbose "#1 Check dir '${keep_dir}'"
 
     echo "${keep_dir}" |
-    egrep '^(/.+|\.+|(.*/){0,1}\.(git|svn|cvs|hg)(/.*){0,1})$' 1>&2 &&
+    egrep '^(/.+|\.+|(.*/){0,1}\.(git|svn|cvs|hg)(/.*){0,1})$' &>/dev/null &&
       continue
 
     _verbose "#2 Dir '${keep_dir}' have a child ?"
 
     echo $(ls -1A "${keep_dir}" |wc -l) |
-    egrep -v '^0$' 1>&2 &&
+    egrep -v '^0$' &>/dev/null &&
       continue
 
     _verbose "#3 Dir '${keep_dir}' is have not child."
