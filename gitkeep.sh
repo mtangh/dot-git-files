@@ -20,7 +20,7 @@ _debug_f=0
 # Usage
 usage() {
   local exitstat="${1:-1}"
-  cat <<_USAGE_
+  cat <<_USAGE_ 2/dev/null
 Usage: $THIS [OPTION] [dir...]
 
 OPTION:
@@ -38,14 +38,16 @@ _USAGE_
 # dir list
 _get_dir_list() {
   local _dirpath=""
-  printf "%b" "${gkbasedirs}" |sort -u |egrep -v '^$' |
+  printf "%b" "${gkbasedirs}" 2>/dev/null |
+  sort -u 2>/dev/null |
   while read _dirpath
   do
+    [[ $_dirpath =~ ^$ ]] &&
     [[ $_dirpath =~ /$ ]] && {
       _dirpath="${_dirpath%/*}"
-    }
+    } 2>/dev/null || :
     echo "$_dirpath"
-  done
+  done || :
   return 0
 }
 
@@ -61,7 +63,7 @@ _echo() {
 _verbose() {
   [ ${_verbose} -ne 0 ] && {
     _echo "$@";
-  } || :
+  } 2>/dev/null || :
   return 0
 }
 
@@ -112,11 +114,10 @@ set -Cu
 gkbasedirs="${gkbasedirs:-.\n}"
 
 # Tag name
-[ -n "${gk_tagname}" ] && {
+[ -z "${gk_tagname}" ] || {
   gk_tagname=".${NAME}"
-} || :
-echo "${gk_tagname}" |
-egrep '^[.].+' 1>/dev/null 2>&1 || {
+}
+[[ "${gk_tagname}" =~ ^[.].+ ]] &>/dev/null || {
   gk_tagname=".${gk_tagname}"
 }
 
@@ -127,7 +128,7 @@ gk_keep_dir=""
 # Cleanup
 [ ${_cleanup} -ne 0 ] && {
 
-  findcmd=$(
+  _findcmd=$(
     [ $_dry_run -eq 0 ] && echo "rm -f"
     [ $_dry_run -eq 0 ] || echo "echo"; )
 
@@ -140,12 +141,12 @@ gk_keep_dir=""
     # Find 'gitkeep' file under the gk_base_dir and remove it.
     find "${gk_base_dir}" \
       -name "${gk_tagname}" -a -type f \
-      -print -exec $findcmd {} \; |
-    while read printent
+      -print -exec ${_findcmd} {} \; 2>/dev/null |
+    while read _printent
     do
-      _verbose "Cleanup: '${printent}'."
-    done
-  done 2>/dev/null
+      _verbose "Cleanup: '${_printent}'."
+    done 2>/dev/null
+  done
   # Rebuild ?
   [ $_rebuild -eq 0 ] && {
     exit 0
@@ -158,22 +159,22 @@ _get_dir_list |
 while read gk_base_dir
 do
 
-  _echo "Gitkeep directory '$gk_base_dir'."
+  _echo "Gitkeep directory '${gk_base_dir}'."
 
-  find "$gk_base_dir" -type d |sort -u |
+  find "$gk_base_dir" -type d 2>/dev/null |
+  sort -u 2>/dev/null |
   while read gk_keep_dir
   do
 
     _verbose "#1 Check dir '${gk_keep_dir}'"
 
-    echo "${gk_keep_dir}" |
-    egrep '^(/.+|\.+|(.*/){0,1}\.(git|svn|cvs|hg)(/.*){0,1})$' &>/dev/null &&
-      continue
+    [[ "${gk_keep_dir}" \
+       =~ ^(/.+|\.+|(.*/){0,1}\.(git|svn|cvs|hg)(/.*){0,1})$ ]] &&
+      continue || :
 
     _verbose "#2 Dir '${gk_keep_dir}' have a child ?"
 
-    echo $(ls -1A "${gk_keep_dir}" |wc -l) |
-    egrep -v '^0$' &>/dev/null &&
+    [[ $(ls -1A ${gk_keep_dir} |wc -l 2>/dev/null) =~ ^0$ ]] ||
       continue
 
     _verbose "#3 Dir '${gk_keep_dir}' is have not child."
@@ -183,8 +184,9 @@ do
 
     _verbose "#4 Dir '${gk_keep_dir}' is gitkeeping."
 
-    [ $_dry_run -eq 0 ] &&
+    [ $_dry_run -eq 0 ] && {
       touch "${gk_keep_dir}/${gk_tagname}"
+    } || :
 
     _echo "+ '${gk_keep_dir}'"
 
