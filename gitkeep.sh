@@ -4,10 +4,10 @@ NAME="${THIS%.*}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
 
 # Base directories.
-basedirs=""
+gkbasedirs=""
 
 # Tag file
-_tagname=".${NAME}"
+gk_tagname=".${NAME}"
 
 # Flags
 _rebuild=0
@@ -38,7 +38,7 @@ _USAGE_
 # dir list
 _get_dir_list() {
   local _dirpath=""
-  printf "%b" "${basedirs}" |sort -u |egrep -v '^$' |
+  printf "%b" "${gkbasedirs}" |sort -u |egrep -v '^$' |
   while read _dirpath
   do
     [[ $_dirpath =~ /$ ]] && {
@@ -71,8 +71,8 @@ do
   case "$1" in
   -t*)
     if [ -n "${1#*-t}" ]
-    then _tagname="${1#*-t}"
-    else _tagname="$2"; shift
+    then gk_tagname="${1#*-t}"
+    else gk_tagname="$2"; shift
     fi
     ;;
   -R|--rebuild) _rebuild=1; _cleanup=1 ;;
@@ -87,7 +87,7 @@ do
     if [ -d "${1}" ]
     then
       # Base dir
-      basedirs="${basedirs}${1}\n"
+      gkbasedirs="${gkbasedirs}${1}\n"
     else
       echo "${THIS}: '${1}': no such file or directory." 1>&2
       exit 2
@@ -109,20 +109,20 @@ set -Cu
 }
 
 # Set default '.' (if empty)
-basedirs="${basedirs:-.\n}"
+gkbasedirs="${gkbasedirs:-.\n}"
 
 # Tag name
-[ -n "${_tagname}" ] && {
-  _tagname=".${NAME}"
+[ -n "${gk_tagname}" ] && {
+  gk_tagname=".${NAME}"
 } || :
-echo "${_tagname}" |
+echo "${gk_tagname}" |
 egrep '^[.].+' 1>/dev/null 2>&1 || {
-  _tagname=".${_tagname}"
+  gk_tagname=".${gk_tagname}"
 }
 
 # Work
-base_dir=""
-keep_dir=""
+gk_base_dir=""
+gk_keep_dir=""
 
 # Cleanup
 [ ${_cleanup} -ne 0 ] && {
@@ -133,13 +133,13 @@ keep_dir=""
 
   # Remove gitkeep
   _get_dir_list |
-  while read base_dir
+  while read gk_base_dir
   do
     # Print
-    _echo "Cleanup: '$base_dir'."
-    # Find 'gitkeep' file under the base_dir and remove it.
-    find "${base_dir}" \
-      -name "${_tagname}" -a -type f \
+    _echo "Cleanup: '$gk_base_dir'."
+    # Find 'gitkeep' file under the gk_base_dir and remove it.
+    find "${gk_base_dir}" \
+      -name "${gk_tagname}" -a -type f \
       -print -exec $findcmd {} \; |
     while read printent
     do
@@ -155,38 +155,38 @@ keep_dir=""
 
 # Process dirs
 _get_dir_list |
-while read base_dir
+while read gk_base_dir
 do
 
-  _echo "Gitkeep directory '$base_dir'."
+  _echo "Gitkeep directory '$gk_base_dir'."
 
-  find "$base_dir" -type d |sort -u |
-  while read keep_dir
+  find "$gk_base_dir" -type d |sort -u |
+  while read gk_keep_dir
   do
 
-    _verbose "#1 Check dir '${keep_dir}'"
+    _verbose "#1 Check dir '${gk_keep_dir}'"
 
-    echo "${keep_dir}" |
+    echo "${gk_keep_dir}" |
     egrep '^(/.+|\.+|(.*/){0,1}\.(git|svn|cvs|hg)(/.*){0,1})$' &>/dev/null &&
       continue
 
-    _verbose "#2 Dir '${keep_dir}' have a child ?"
+    _verbose "#2 Dir '${gk_keep_dir}' have a child ?"
 
-    echo $(ls -1A "${keep_dir}" |wc -l) |
+    echo $(ls -1A "${gk_keep_dir}" |wc -l) |
     egrep -v '^0$' &>/dev/null &&
       continue
 
-    _verbose "#3 Dir '${keep_dir}' is have not child."
+    _verbose "#3 Dir '${gk_keep_dir}' is have not child."
 
-    [ -e "${keep_dir}/${_tagname}" ] &&
+    [ -e "${gk_keep_dir}/${gk_tagname}" ] &&
       continue
 
-    _verbose "#4 Dir '${keep_dir}' is gitkeeping."
+    _verbose "#4 Dir '${gk_keep_dir}' is gitkeeping."
 
     [ $_dry_run -eq 0 ] &&
-      touch "${keep_dir}/${_tagname}"
+      touch "${gk_keep_dir}/${gk_tagname}"
 
-    _echo "+ '${keep_dir}'"
+    _echo "+ '${gk_keep_dir}'"
 
   done
 
