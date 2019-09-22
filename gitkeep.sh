@@ -174,7 +174,7 @@ do
 
     _verbose "#2 Dir '${gk_keep_dir}' have a child ?"
 
-    [[ $(ls -1A ${gk_keep_dir} |wc -l 2>/dev/null) =~ ^0$ ]] ||
+    [[ $(ls -1A ${gk_keep_dir} |wc -l 2>/dev/null) =~ ^[\ \\t]*0$ ]] ||
       continue
 
     _verbose "#3 Dir '${gk_keep_dir}' is have not child."
