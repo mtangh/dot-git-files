@@ -15,21 +15,21 @@ do
 
   tests_cseq=$((++tests_cseq))
   xtrace_out="${tests_sh%.sh*}.xtrace.log"
-  printf "#""%.s" {1..48}
-  printf "\r%s " "${tests_sh##*/}"
-  echo
+  echo "${tests_sh##*/}: Start the test."
   BASH_XTRACEFD=3 \
   bash -x "${tests_sh}" 3>"${xtrace_out}" || {
     tests_rval=$?
     echo
-    echo "${tests_sh##*/}: Exit (${tests_rval:-1})."
-    echo "${tests_sh##*/}: XTRACE are:"
+    echo "${tests_sh##*/}: This test failed."
+    echo "${tests_sh##*/}: XTRACE is as follows:"
     cat "${xtrace_out}" 2>/dev/null
+    echo
+    echo "${tests_sh##*/}: Exit with (${tests_rval:-1})."
     echo
     continue
   }
   echo
-  echo "OK."
+  echo "${tests_sh##*/}: OK."
 
 done &&
 [ ${tests_cseq:-0} -gt 0 ] &&
