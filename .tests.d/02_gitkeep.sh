@@ -4,18 +4,18 @@ THIS="${BASH_SOURCE##*/}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
 
 # Run tests
-: "Basic syntax check" && {
+echo "Basic syntax check" && {
 
   bash -n gitkeep.sh &&
   : "OK"
 
 } &&
-: "Gitkeeping" && {
+echo "Gitkeeping" && {
 
   rm -rf ./t 1>/dev/null 2>&1 || :
   mkdir -p t/{dir1,dir2,dir3/child1,dir3/child2} || :
 
-  : "Create Gitkeep" && {
+  echo "Gitkeeping: Create Gitkeep" && {
 
     touch t/dir1/file1.txt &&
     touch t/dir3/child1/file2.txt &&
@@ -27,7 +27,7 @@ CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
     : "OK"
 
   } &&
-  : "Rebuild Gitkeep" && {
+  echo "Gitkeeping: Rebuild Gitkeep" && {
 
     mv -f t/dir{1,2}/file1.txt &&
     mv -f t/dir3/child{1,2}/file2.txt &&
@@ -41,7 +41,7 @@ CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
   }
 
 } &&
-: "DONE."
+echo "DONE."
 
 # End
 exit $?

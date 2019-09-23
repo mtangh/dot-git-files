@@ -6,16 +6,16 @@ CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
 gitconfdir="${HOME}/.config/git"
 
 # Run tests
-: "Basic syntax check" && {
+echo "Basic syntax check" && {
 
   bash -n update.sh &&
   bash -n gitfilesupdate.sh &&
   : "OK"
 
 } &&
-: "Run with --global" && {
+echo "Run with --global" && {
 
-  rm -rf "${gitconfdir}" 1>/dev/null 2>&1 || :
+  rm -rf "${gitconfdir%/*}" 1>/dev/null 2>&1 || :
 
   mkdir -p "${gitconfdir}" &&
   bash -x -- ${tests_wdir}/gitfilesupdate.sh --global &&
@@ -28,9 +28,9 @@ gitconfdir="${HOME}/.config/git"
   : "OK"
 
 } &&
-: "Run with --global and --with-config" && {
+echo "Run with --global and --with-config" && {
 
-  rm -rf "${gitconfdir}" 1>/dev/null 2>&1 || :
+  rm -rf "${gitconfdir%/*}" 1>/dev/null 2>&1 || :
 
   mkdir -p "${gitconfdir}" &&
   bash -x -- ${tests_wdir}/gitfilesupdate.sh --global --with-config &&
@@ -43,9 +43,9 @@ gitconfdir="${HOME}/.config/git"
   : "OK"
 
 } &&
-: "Run with --global and --with-config (No XDG_CONFIG_HOME)" && {
+echo "Run with --global and --with-config (No XDG_CONFIG_HOME)" && {
 
-  rm -rf "${gitconfdir}" 1>/dev/null 2>&1 || :
+  rm -rf "${gitconfdir%/*}" 1>/dev/null 2>&1 || :
 
   bash -x -- ${tests_wdir}/gitfilesupdate.sh --global --with-config &&
   [ -r "${HOME}/.gitignore" ] &&
@@ -57,7 +57,7 @@ gitconfdir="${HOME}/.config/git"
   : "OK"
 
 } &&
-: "Run with --project" && {
+echo "Run with --project" && {
 
   rm -rf "${HOME}/test" 1>/dev/null 2>&1 || :
 
@@ -71,7 +71,7 @@ gitconfdir="${HOME}/.config/git"
   : "OK"
 
 } &&
-: "Run with --local" && {
+echo "Run with --local" && {
 
   rm -rf "${HOME}/test" 1>/dev/null 2>&1 || :
 
@@ -85,7 +85,7 @@ gitconfdir="${HOME}/.config/git"
   : "OK"
 
 } &&
-: "DONE."
+echo "DONE."
 
 # End
 exit $?
