@@ -114,7 +114,7 @@ script:
     } &&
     : "DONE."
 
-  - bash .travis-tests.sh
+  - bash -Cu .tests.sh
 
 
 # Notifications
