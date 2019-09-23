@@ -19,8 +19,11 @@ do
     echo "${tests_sh##*/}: Exit (${tests_result:-1})."
     echo "${tests_sh##*/}: XTRACE are:"
     cat "${tests_xtrace_out}" 2>/dev/null
+    echo
+    continue
   }
   echo
+  echo "OK."
 done
 
 # End
