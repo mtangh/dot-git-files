@@ -3,9 +3,6 @@
 THIS="${BASH_SOURCE##*/}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
 
-# Result
-tests_result=0
-
 # Run tests
 : "Basic syntax check" && {
 
@@ -22,7 +19,7 @@ tests_result=0
 
     touch t/dir1/file1.txt &&
     touch t/dir3/child1/file2.txt &&
-    bash -x -- "${base_dir}/gitkeep.sh" ./t &&
+    bash -x -- "${tests_base_dir}/gitkeep.sh" ./t &&
     [ ! -r "t/dir1/.gitkeep" ] &&
     [   -r "t/dir2/.gitkeep" ] &&
     [ ! -r "t/dir3/child1/.gitkeep" ] &&
@@ -34,7 +31,7 @@ tests_result=0
 
     mv -f t/dir{1,2}/file1.txt &&
     mv -f t/dir3/child{1,2}/file2.txt &&
-    bash -x -- "${base_dir}/gitkeep.sh" --rebuild ./t &&
+    bash -x -- "${tests_base_dir}/gitkeep.sh" --rebuild ./t &&
     [   -r "t/dir1/.gitkeep" ] &&
     [ ! -r "t/dir2/.gitkeep" ] &&
     [   -r "t/dir3/child1/.gitkeep" ] &&
@@ -47,4 +44,4 @@ tests_result=0
 : "DONE."
 
 # End
-exit ${tests_result:-1}
+exit $?

@@ -2,8 +2,8 @@
 THIS="${BASH_SOURCE##*/}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
 
-# Result
-tests_result=0
+# Tests vars
+git_config_dir="${HOME}/.config/git"
 
 # Run tests
 : "Basic syntax check" && {
@@ -15,39 +15,39 @@ tests_result=0
 } &&
 : "Run with --global" && {
 
-  rm -rf "${gitconf_dir}" 1>/dev/null 2>&1 || :
+  rm -rf "${git_config_dir}" 1>/dev/null 2>&1 || :
 
-  mkdir -p "${gitconf_dir}" &&
-  bash -x -- ${dotgit_root}/gitfilesupdate.sh --global &&
-  [   -r "${gitconf_dir}/ignore" ] &&
-  [   -r "${gitconf_dir}/attributes" ] &&
-  [   -x "${gitconf_dir}/gitfilesupdate.sh" ] &&
-  [   -x "${gitconf_dir}/gitkeep.sh" ] &&
-  [ ! -r "${gitconf_dir}/config" ] &&
-  [ ! -r "${gitconf_dir}/config.local.tmplt" ] &&
+  mkdir -p "${git_config_dir}" &&
+  bash -x -- ${tests_base_dir}/gitfilesupdate.sh --global &&
+  [   -r "${git_config_dir}/ignore" ] &&
+  [   -r "${git_config_dir}/attributes" ] &&
+  [   -x "${git_config_dir}/gitfilesupdate.sh" ] &&
+  [   -x "${git_config_dir}/gitkeep.sh" ] &&
+  [ ! -r "${git_config_dir}/config" ] &&
+  [ ! -r "${git_config_dir}/config.local.tmplt" ] &&
   : "OK"
 
 } &&
 : "Run with --global and --with-config" && {
 
-  rm -rf "${gitconf_dir}" 1>/dev/null 2>&1 || :
+  rm -rf "${git_config_dir}" 1>/dev/null 2>&1 || :
 
-  mkdir -p "${gitconf_dir}" &&
-  bash -x -- ${dotgit_root}/gitfilesupdate.sh --global --with-config &&
-  [ -r "${gitconf_dir}/ignore" ] &&
-  [ -r "${gitconf_dir}/attributes" ] &&
-  [ -x "${gitconf_dir}/gitfilesupdate.sh" ] &&
-  [ -x "${gitconf_dir}/gitkeep.sh" ] &&
-  [ -r "${gitconf_dir}/config" ] &&
-  [ -r "${gitconf_dir}/config.local.tmplt" ] &&
+  mkdir -p "${git_config_dir}" &&
+  bash -x -- ${tests_base_dir}/gitfilesupdate.sh --global --with-config &&
+  [ -r "${git_config_dir}/ignore" ] &&
+  [ -r "${git_config_dir}/attributes" ] &&
+  [ -x "${git_config_dir}/gitfilesupdate.sh" ] &&
+  [ -x "${git_config_dir}/gitkeep.sh" ] &&
+  [ -r "${git_config_dir}/config" ] &&
+  [ -r "${git_config_dir}/config.local.tmplt" ] &&
   : "OK"
 
 } &&
 : "Run with --global and --with-config (No XDG_CONFIG_HOME)" && {
 
-  rm -rf "${gitconf_dir}" 1>/dev/null 2>&1 || :
+  rm -rf "${git_config_dir}" 1>/dev/null 2>&1 || :
 
-  bash -x -- ${dotgit_root}/gitfilesupdate.sh --global --with-config &&
+  bash -x -- ${tests_base_dir}/gitfilesupdate.sh --global --with-config &&
   [ -r "${HOME}/.gitignore" ] &&
   [ -r "${HOME}/.gitattributes" ] &&
   [ -x "${HOME}/.gitfilesupdate.sh" ] &&
@@ -63,7 +63,7 @@ tests_result=0
 
   ( git init "${HOME}/test" &&
     cd "${HOME}/test" &&
-    bash -x -- ${dotgit_root}/gitfilesupdate.sh --project ) &&
+    bash -x -- ${tests_base_dir}/gitfilesupdate.sh --project ) &&
   [ -r "${HOME}/test/.gitignore" ] &&
   [ -r "${HOME}/test/.gitattributes" ] &&
   [ -x "${HOME}/test/.gitfilesupdate.sh" ] &&
@@ -77,7 +77,7 @@ tests_result=0
 
   ( git init "${HOME}/test" &&
     cd "${HOME}/test" &&
-    bash -x -- ${dotgit_root}/gitfilesupdate.sh --local ) &&
+    bash -x -- ${tests_base_dir}/gitfilesupdate.sh --local ) &&
   [   -r "${HOME}/test/.git/info/excludes" ] &&
   [   -r "${HOME}/test/.git/info/attributes" ] &&
   [ ! -x "${HOME}/test/.git/info/gitfilesupdate.sh" ] &&
@@ -88,4 +88,4 @@ tests_result=0
 : "DONE."
 
 # End
-exit ${tests_result:-1}
+exit $?
