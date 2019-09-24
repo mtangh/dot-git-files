@@ -17,23 +17,23 @@ do
   tests_name="${tests_sh##*/}"
   tests_name="${tests_name%.sh*}"
   xtrace_out="${tests_sh%.sh*}.xtrace.log"
-  echo "${tests_name}: Start the test."
+  echo "[${tests_name}] Start the test."
   BASH_XTRACEFD=3 \
   tests_name="${tests_name}" \
   tests_wdir="${CDIR}" \
   bash -x "${tests_sh}" 3>"${xtrace_out}" || {
     tests_rval=$?
     echo
-    echo "${tests_name}: This test failed."
-    echo "${tests_name}: XTRACE is as follows:"
+    echo "[${tests_name}] This test failed."
+    echo "[${tests_name}] XTRACE is as follows:"
     cat "${xtrace_out}" 2>/dev/null
     echo
-    echo "${tests_name}: Exit with (${tests_rval:-1})."
+    echo "[${tests_name}] Exit with (${tests_rval:-1})."
     echo
     continue
   }
   echo
-  echo "${tests_name}: OK."
+  echo "[${tests_name}] OK."
 
 done &&
 [ ${tests_cseq:-0} -gt 0 ] &&

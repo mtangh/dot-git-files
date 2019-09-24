@@ -48,7 +48,6 @@ dotgit_out=""
 
 # Stdout
 _stdout() {
-  set +x
   local row_data=""
   cat | while IFS= read row_data
   do printf "${THIS:-${DOTGIT_PRJ}/update.sh}: %s" "${row_data}"; echo
@@ -149,7 +148,7 @@ _USAGE_
 done
 
 # Redirect to filter
-exec 1> >(_stdout 2>/dev/null)
+exec 1> >(BASH_XTRACEFD=2 _stdout 2>/dev/null)
 
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
