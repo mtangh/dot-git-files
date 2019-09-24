@@ -43,13 +43,13 @@
 	# In addition to .gitattributes (per-directory) and
 	# .git/info/attributes, Git looks into this file for attributes
 	# (see gitattributes[5]).
-	attributesfile = ~/.config/git/attributes
+	#attributesfile = ~/.config/git/attributes
 
 	# core.excludesFile:
 	# Specifies the pathname to the file that contains patterns to
 	# describe paths that are not meant to be tracked, in addition
 	# to .gitignore (per-directory) and .git/info/exclude.
-	excludesfile = ~/.config/git/ignore
+	#excludesfile = ~/.config/git/ignore
 
 	# core.hooksPath:
 	# By default Git will look for your hooks in the $GIT_DIR/hooks

@@ -19,6 +19,7 @@ do
   xtrace_out="${tests_sh%.sh*}.xtrace.log"
   echo "${tests_name}: Start the test."
   BASH_XTRACEFD=3 \
+  tests_name="${tests_name}" \
   tests_wdir="${CDIR}" \
   bash -x "${tests_sh}" 3>"${xtrace_out}" || {
     tests_rval=$?

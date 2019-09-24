@@ -48,9 +48,11 @@ dotgit_out=""
 
 # Stdout
 _stdout() {
+  set +x
   local row_data=""
   cat | while IFS= read row_data
-  do printf "${THIS:-${DOTGIT_PRJ}/update.sh}: %s" "${row_data}"; echo; done
+  do printf "${THIS:-${DOTGIT_PRJ}/update.sh}: %s" "${row_data}"; echo
+  done 2>/dev/null
   return 0
 }
 
