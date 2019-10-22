@@ -372,7 +372,7 @@ _EOC_
   additlines=$(
     [ -d "${dotgitdest}.d" ] && {
       cat "${dotgitdest}.d"/*.conf
-    } 2>/dev/null |wc -l )
+    } 2>/dev/null |wc -l |tr -d '\t ')
 
   if [ ${additlines:-0} -gt 0 ]
   then
