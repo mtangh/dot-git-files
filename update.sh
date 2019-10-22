@@ -345,7 +345,7 @@ do
   additlines=$(
     [ -f "${dotgitdest}.proj" ] && {
       cat "${dotgitdest}.proj"
-    } 2>/dev/null |wc -l )
+    } 2>/dev/null |wc -l |tr -d ' ')
 
   if [ ${additlines:-0} -gt 0 ]
   then
