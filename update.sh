@@ -1,7 +1,10 @@
 #!/bin/bash
 THIS="${BASH_SOURCE##*/}"
-NAME="${THIS%.*}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
+
+# Name
+THIS="${THIS:-update.sh}"
+NAME="${THIS%.*}"
 
 # dot-git-files URL
 DOTGIT_URL="${DOTGIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
@@ -48,10 +51,15 @@ dotgit_out=""
 
 # Stdout
 _stdout() {
+  local rowlanel="${1:-$THIS}"
   local row_data=""
   cat | while IFS= read row_data
-  do printf "${THIS:-${DOTGIT_PRJ}/update.sh}: %s" "${row_data}"; echo
-  done 2>/dev/null
+  do
+    if [[ "${row_data}" =~ ^${rowlanel}: ]]
+    then printf "%s" "${row_data}"
+    else printf "${rowlanel}: %s" "${row_data}"
+    fi; echo
+  done
   return 0
 }
 
@@ -148,7 +156,7 @@ _USAGE_
 done
 
 # Redirect to filter
-exec 1> >(BASH_XTRACEFD=2 _stdout 2>/dev/null)
+exec 1> >(set +x; _stdout "${DOTGIT_PRJ}/${THIS}" 2>/dev/null)
 
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
