@@ -6,7 +6,7 @@ CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
 # Run tests
 echo "[${tests_name}] Basic syntax check" && {
 
-  bash -n gitkeep.sh &&
+  bash -n "${tests_wdir}/gitkeep.sh" &&
   : "OK"
 
 } &&
