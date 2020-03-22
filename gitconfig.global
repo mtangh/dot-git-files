@@ -2,6 +2,39 @@
 # https://github.com/mtangh/dot-git-files/
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
+[user]
+
+	# user.name, user.email,
+	# author.name, author.email,
+	# committer.name, committer.email:
+	# The user.name and user.email variables determine what ends up in
+	# the author and committer field of commit objects. If you need the
+	# author or committer to be different, the author.name, author.email,
+	# committer.name or committer.email variables can be set. Also, all
+	# of these can be overridden by the GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL,
+	# GIT_COMMITTER_NAME, GIT_COMMITTER_EMAIL and EMAIL environment
+	# variables. See git-commit-tree[1] for more information.
+	#name = gituser
+	#email = gituser
+
+	# user.useConfigOnly:
+	# Instruct Git to avoid trying to guess defaults for user.email and
+	# user.name, and instead retrieve the values only from the configuration.
+	# For example, if you have multiple email addresses and would like to
+	# use a different one for each repository, then with this configuration
+	# option set to true in the global config along with a name, Git will
+	# prompt you to set up an email before making new commits in a newly
+	# cloned repository. Defaults to false.
+	useConfigOnly = false
+
+	# user.signingKey:
+	# If git-tag[1] or git-commit[1] is not selecting the key you want it
+	# to automatically when creating a signed tag or commit, you can override
+	# the default selection with this variable. This option is passed
+	# unchanged to gpgB!Gs --local-user parameter, so you may specify a key
+	# using any method that gpg supports.
+	#signingKey =
+
 [core]
 
 	# core.fileMode:
@@ -173,9 +206,10 @@
 	#  relevant for indent-with-non-tab and when Git fixes
 	#  tab-in-indent errors. The default tab width is 8. Allowed
 	#  values are 1 to 63.
-	whitespace = trailing-space,blank-at-eol,blank-at-eof, \
-	             space-before-tab,tab-in-indent,tabwidth=4 \
-	             -indent-with-non-tab,-cr-at-eol
+	whitespace = \
+	trailing-space, blank-at-eol, blank-at-eof,\
+	space-before-tab, tab-in-indent, tabwidth=4,\
+	-indent-with-non-tab, -cr-at-eol
 
 [commit]
 
@@ -473,6 +507,13 @@
 	ll    = log --pretty=format:'%h %an, %ad: %s'
 	lg    = log --pretty=format:'%h %an, %ad: %s' --graph
 
+	cfg = config --list
+	cfg-ls = config --list
+	cfg-ls-global = config --global --list
+	cfg-get = config --get
+
+	user = config --get-regexp ^user[.].*
+
 	prune     = fetch --prune
 	undo      = reset --soft HEAD^
 	stash-all = stash save --include-untracked
@@ -488,6 +529,5 @@
 	# include.path (or includeIf.*.path) variable to the name of the file to be
 	# included. The variable takes a pathname as its value, and is subject to
 	# tilde expansion. These variables can be given multiple times.
-
-	path = ~/.config/git/config.local
+	#path = /path/to/include-file
 

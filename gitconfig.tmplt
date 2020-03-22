@@ -1,0 +1,15 @@
+# ${HOME}/.gitconfig
+# https://github.com/mtangh/dot-git-files/
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+[user]
+	name = GIT_USER_NAME
+	email = GIT_USER_EMAIL
+
+[include]
+
+	# include.path, includeIf.*.path:
+	# The include and includeIf sections allow you to include config directives
+	# from another source.
+
+	path = GIT_CONFIG_PATH

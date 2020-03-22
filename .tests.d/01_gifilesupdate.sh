@@ -23,8 +23,8 @@ echo "[${tests_name}] Run with --global" && {
   [   -r "${gitconfdir}/attributes" ] &&
   [   -x "${gitconfdir}/gitfilesupdate.sh" ] &&
   [   -x "${gitconfdir}/gitkeep.sh" ] &&
-  [ ! -r "${gitconfdir}/config" ] &&
-  [ ! -r "${gitconfdir}/config.local.tmplt" ] &&
+  [ ! -r "${gitconfdir}/config.global" ] &&
+  [ ! -r "${gitconfdir}/config.tmplt" ] &&
   : "OK"
 
 } &&
@@ -38,8 +38,8 @@ echo "[${tests_name}] Run with --global and --with-config" && {
   [ -r "${gitconfdir}/attributes" ] &&
   [ -x "${gitconfdir}/gitfilesupdate.sh" ] &&
   [ -x "${gitconfdir}/gitkeep.sh" ] &&
-  [ -r "${gitconfdir}/config" ] &&
-  [ -r "${gitconfdir}/config.local.tmplt" ] &&
+  [ -r "${gitconfdir}/config.global" ] &&
+  [ -r "${gitconfdir}/config.tmplt" ] &&
   : "OK"
 
 } &&
@@ -52,8 +52,8 @@ echo "[${tests_name}] Run with --global and --with-config (No XDG_CONFIG_HOME)" 
   [ -r "${HOME}/.gitattributes" ] &&
   [ -x "${HOME}/.gitfilesupdate.sh" ] &&
   [ -x "${HOME}/.gitkeep.sh" ] &&
-  [ -r "${HOME}/.gitconfig" ] &&
-  [ -r "${HOME}/.gitconfig.local.tmplt" ] &&
+  [ -r "${HOME}/.gitconfig.global" ] &&
+  [ -r "${HOME}/.gitconfig.tmplt" ] &&
   : "OK"
 
 } &&
