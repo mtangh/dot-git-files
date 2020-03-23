@@ -3,9 +3,6 @@
 
 language: shell
 
-## Use the new container infrastructure
-#sudo: false
-
 # Install packages
 install: true
 
