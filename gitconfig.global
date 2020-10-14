@@ -492,31 +492,43 @@
 	# GIT_PREFIX is set as returned by running git rev-parse --show-prefix
 	# from the original current directory. See git-rev-parse[1].
 
-	co    = checkout
-	ci    = commit
-	stat  = status
-	st    = status
-	sh    = show
-	up    = fetch
-	ft    = fetch
-	ftp   = fetch --prune
-	b     = branch
-	d     = diff
-	dc    = diff --cached
-	ls    = log --pretty=format:'%h %an, %ad: %s' --stat
-	ll    = log --pretty=format:'%h %an, %ad: %s'
-	lg    = log --pretty=format:'%h %an, %ad: %s' --graph
-
-	cfg = config --list
-	cfg-ls = config --list
-	cfg-ls-global = config --global --list
-	cfg-get = config --get
-
-	user = config --get-regexp ^user[.].*
+	co      = checkout
+	ci      = commit
+	stat    = status
+	st      = status
+	stt     = status -uno
+	sh      = show
+	up      = fetch
+	ft      = fetch
+	ftp     = fetch --prune
+	b       = branch
+	diffc   = diff --cached
+	difff   = diff --name-only
+	diffp   = diff --no-prefix
+	diffw   = diff --word-diff
+	d       = diff
+	dc      = diff --cached
+	df      = diff --name-only
+	dp      = diff --no-prefix
+	dw      = diff --word-diff
+	ls      = log --pretty=format:'%h %an, %ad: %s' --stat
+	ll      = log --pretty=format:'%h %an, %ad: %s'
+	lg      = log --pretty=format:'%h %an, %ad: %s' --graph
+	graph   = log --pretty=format:'%Cgreen%h %Creset%cd %Cblue%cn %Cred%d %Creset%s' --graph --date=short --decorate=short
+	gr      = log --pretty=format:'%Cgreen%h %Creset%cd %Cblue%cn %Cred%d %Creset%s' --graph --date=short --decorate=short
 
 	prune     = fetch --prune
 	undo      = reset --soft HEAD^
+	unstage   = reset --mixed HEAD
 	stash-all = stash save --include-untracked
+
+	cfg           = config --list
+	cfg-ls        = config --list
+	cfg-ls-global = config --list --global
+	cfg-get       = config --get
+
+	user          = config --get-regexp ^user[.].*
+	aliases       = config --get-regexp ^alias[.].*
 
 [include]
 
