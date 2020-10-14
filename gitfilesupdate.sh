@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 THIS="${BASH_SOURCE##*/}"
 NAME="${THIS%.*}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)

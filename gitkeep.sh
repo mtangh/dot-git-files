@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 THIS="${BASH_SOURCE##*/}"
 NAME="${THIS%.*}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
@@ -70,7 +70,7 @@ _verbose() {
 # Options
 while [ $# -gt 0 ]
 do
-  case "$1" in
+  case "${1:-}" in
   -t*)
     if [ -n "${1#*-t}" ]
     then gk_tagname="${1#*-t}"
@@ -86,12 +86,12 @@ do
   -h|--help)    usage 0 ;;
   -*)           usage 1 ;;
   *)
-    if [ -d "${1}" ]
+    if [ -d "${1:-}" ]
     then
       # Base dir
       gkbasedirs="${gkbasedirs}${1}\n"
     else
-      echo "${THIS}: '${1}': no such file or directory." 1>&2
+      echo "${THIS}: '${1:-}': no such file or directory." 1>&2
       exit 2
     fi
     ;;
