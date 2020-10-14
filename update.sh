@@ -153,6 +153,7 @@ do
 Usage: ${THIS:-${DOTGIT_PRJ}/update.sh} [--global|--project|--local] [--with-config|--without-config]
 
 _USAGE_
+    exit 0
     ;;
   -*)
     _abort 22 "Illegal option '${1:-}'."
