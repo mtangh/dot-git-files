@@ -77,7 +77,7 @@ _abort() {
 # Cleanup
 _cleanup() {
   [ -z "${dotgitwdir:-}" ] || {
-    rm -rf "${dotgitwdir:-}" 1>/dev/null 2>&1
+    rm -rf "${dotgitwdir:-}" &>/dev/null
   } || :
   return 0
 }
@@ -97,7 +97,7 @@ _git_config_template() {
     gitemail="$(uname -un 2>/dev/null)@$(hostname -f 2>/dev/null)"
     git_conf="${filepath%.*}.global"
     cat "${filepath}" |
-    egrep "^${HOME}" 1>/dev/null 2>&1 && {
+    egrep "^${HOME}" &>/dev/null && {
       git_conf="~${git_conf##*${HOME}}"
     } || :
     cat "${filepath}" |
@@ -257,7 +257,7 @@ esac
 
 # Create a work-dir if not exists
 [ -d "${dotgitwdir}" ] || {
-  mkdir -p "${dotgitwdir}" 1>/dev/null 2>&1
+  mkdir -p "${dotgitwdir}" &>/dev/null
 } || :
 
 # Set trap
@@ -267,7 +267,7 @@ trap "_cleanup" EXIT
 # git/info
 if [ "${GITAPLY_TO}" = "3" -a ! -d "${GITAPLYDIR}" ]
 then mkdir -p "${GITAPLYDIR}"
-fi 1>/dev/null 2>&1
+fi &>/dev/null
 
 # Process files
 for dotgitfile in $(
@@ -350,7 +350,7 @@ do
   [ -n "${dotgitdest}" ] || continue
 
   ${dgcmd_fget} "${dotgit_url}" 1>|"${dotgittemp}" 2>/dev/null || {
-    rm -f "${dotgittemp}" 1>/dev/null 2>&1
+    rm -f "${dotgittemp}" &>/dev/null
     continue
   }
 
