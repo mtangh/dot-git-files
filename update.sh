@@ -166,7 +166,7 @@ _USAGE_
 done
 
 # Redirect to filter
-exec 1> >(set +x; _stdout "${DOTGIT_PRJ}/${THIS}" 2>/dev/null)
+exec 1>| >(set +x; _stdout "${DOTGIT_PRJ}/${THIS}" 2>/dev/null)
 
 # Enable trace, verbose
 [ ${X_TRACE_ON} -eq 0 ] || {
