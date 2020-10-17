@@ -1,10 +1,10 @@
-#!/bin/bash -u
+#!/bin/bash
 THIS="${BASH_SOURCE##*/}"
+NAME="${THIS%.*}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
 
-# Name
-THIS="${THIS:-update.sh}"
-NAME="${THIS%.*}"
+# Prohibits overwriting by redirect and use of undefined variables.
+set -Cu
 
 # dot-git-files URL
 DOTGIT_URL="${DOTGIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
@@ -168,9 +168,6 @@ done
 # Redirect to filter
 exec 1> >(set +x; _stdout "${DOTGIT_PRJ}/${THIS}" 2>/dev/null)
 
-# Prohibits overwriting by redirect and use of undefined variables.
-set -Cu
-
 # Enable trace, verbose
 [ ${X_TRACE_ON} -eq 0 ] || {
   PS4='>(${THIS:-${DOTGIT_PRJ}/update.sh}:${LINENO:--})${FUNCNAME:+:$FUNCNAME()}: '
@@ -180,24 +177,21 @@ set -Cu
 
 # File get command
 dgcmd_fget=""
-[ -z "${dgcmd_fget}" ] &&
-[ -n "$(type -P curl 2>/dev/null)" ] &&
+[ -z "${dgcmd_fget}" -a -n "$(type -P curl 2>/dev/null)" ] &&
 dgcmd_fget="$(type -P curl) -sL"
-[ -z "${dgcmd_fget}" ] &&
-[ -n "$(type -P wget 2>/dev/null)" ] &&
+[ -z "${dgcmd_fget}" -a -n "$(type -P wget 2>/dev/null)" ] &&
 dgcmd_fget="$(type -P wget) -qO -"
 [ -z "${dgcmd_fget}" ] && {
   _anort 1 "Command (curl or wget) not found."
-}
+} || :
 
 # Diff command
 dgcmd_diff=""
-[ -z "${dgcmd_diff}" ] &&
-[ -n "$(type -P diff 2>/dev/null)" ] &&
+[ -z "${dgcmd_diff}" -a -n "$(type -P diff 2>/dev/null)" ] &&
 dgcmd_diff="$(type -P diff 2>/dev/null)"
 [ -z "${dgcmd_diff}" ] && {
   _abort 1 "Command (diff) not found."
-}
+} || :
 
 # Apply to
 case "${GITAPLY_TO}" in
@@ -474,7 +468,7 @@ _EOD_
   dotgitline=$(cat "${dotgit_out}" 2>/dev/null |wc -l)
 
   cat -n "${dotgit_out}" |
-  if [ $dotgitline -gt 10 ]
+  if [ ${dotgitline} -gt 10 ]
   then head -n 9; printf "%7s" ":"; echo
   else cat
   fi || :

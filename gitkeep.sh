@@ -1,7 +1,10 @@
-#!/bin/bash -u
+#!/bin/bash
 THIS="${BASH_SOURCE##*/}"
 NAME="${THIS%.*}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
+
+# Prohibits overwriting by redirect and use of undefined variables.
+set -Cu
 
 # Base directories.
 gkbasedirs=""
@@ -98,9 +101,6 @@ do
   esac
   shift
 done
-
-# No unbound vars
-set -Cu
 
 # Enable trace, verbose
 [ $_debug_f -eq 0 ] || {
