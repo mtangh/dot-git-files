@@ -1,4 +1,4 @@
-# ${HOME}/.gitconfig
+# gitconfig
 # https://github.com/mtangh/dot-git-files/
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
@@ -13,3 +13,4 @@
 	# from another source.
 
 	path = GIT_CONFIG_PATH
+

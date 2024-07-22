@@ -1,7 +1,10 @@
 #!/bin/bash
 THIS="${BASH_SOURCE##*/}"
-NAME="${THIS%.*}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
+
+# Name
+THIS="${THIS:-update.sh}"
+NAME="${THIS%.*}"
 
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
@@ -20,7 +23,7 @@ GITAPLYDIR="${GIT_DIR:-}"
 GITAPLY_TO=0
 
 # Flag: With config
-WITHCONFIG=0
+WITHCONFIG=
 
 # Flag: Xtrace
 X_TRACE_ON=0
@@ -49,27 +52,13 @@ dotgitdiff=""
 dotgitbkup=""
 dotgit_out=""
 
-# Stdout
-_stdout() {
-  local rowlabel="${1:-$THIS}"
-  local row_data=""
-  cat | while IFS= read row_data
-  do
-    if [[ "${row_data}" =~ ^${rowlabel}: ]]
-    then printf "%s" "${row_data}"
-    else printf "${rowlabel}: %s" "${row_data}"
-    fi; echo
-  done
-  return 0
-}
-
 # Abort
 _abort() {
   local exitcode=1 &>/dev/null
   [[ ${1:-} =~ ^[0-9]+$ ]] && {
     exitcode="${1:-}"; shift;
   } &>/dev/null
-  echo "ERROR: $@" "(${exitcode:-1})" |_stdout 1>&2
+  echo "${DOTGIT_PRJ}/${THIS}: ERROR: $@" "(${exitcode:-1})" |_stdout 1>&2
   [ ${exitcode:-1} -le 0 ] || exit ${exitcode:-1}
   return 0
 }
@@ -92,19 +81,19 @@ _git_config_template() {
   case "${filepath##*.}" in
   tmpl|tmplt|template)
     [ -n "${git_user}" ] ||
-    git_user="$(uname -un 2>/dev/null)"
-    [ -n "${git_user}" ] ||
-    gitemail="$(uname -un 2>/dev/null)@$(hostname -f 2>/dev/null)"
+    git_user="$(id -un 2>/dev/null)"
+    [ -n "${gitemail}" ] ||
+    gitemail="$(id -un 2>/dev/null)@$(hostname -f 2>/dev/null)"
     git_conf="${filepath%.*}.global"
-    cat "${filepath}" |
-    egrep "^${HOME}" &>/dev/null && {
-      git_conf="~${git_conf##*${HOME}}"
+    echo "${filepath}" |
+    egrep '^'"${HOME}" &>/dev/null && {
+      git_conf="~${git_conf##*$HOME}"
     } || :
     cat "${filepath}" |
-    sed -e \
-      's/GIT_USER_NAME/\1'"${git_user}"'/g' \
-      's/GIT_USER_EMAIL/\1'"${gitemail}"'/g' \
-      's;GIT_CONFIG_PATH;'"${git_conf}"';g' \
+    sed -r \
+      -e 's/GIT_USER_NAME/'"${git_user}"'/g' \
+      -e 's/GIT_USER_EMAIL/'"${gitemail}"'/g' \
+      -e 's;GIT_CONFIG_PATH;'"${git_conf}"';g' \
       2>/dev/null || :
     [ -d "${filepath}.d" ] && {
       echo
@@ -149,8 +138,8 @@ do
     DRY_RUN_ON=1
     ;;
   -h|-help*|--help*)
-    cat <<_USAGE_
-Usage: ${THIS:-${DOTGIT_PRJ}/update.sh} [--global|--project|--local] [--with-config|--without-config]
+cat - <<_USAGE_
+Usage: ${DOTGIT_PRJ}/${THIS}: [--global|--project|--local] [--with-config|--without-config]
 
 _USAGE_
     exit 0
@@ -165,12 +154,9 @@ _USAGE_
   shift
 done
 
-# Redirect to filter
-exec 1>| >(set +x; _stdout "${DOTGIT_PRJ}/${THIS}" 2>/dev/null)
-
 # Enable trace, verbose
 [ ${X_TRACE_ON} -eq 0 ] || {
-  PS4='>(${THIS:-${DOTGIT_PRJ}/update.sh}:${LINENO:--})${FUNCNAME:+:$FUNCNAME()}: '
+  PS4='>(${DOTGIT_PRJ}/${THIS}:${LINENO:--})${FUNCNAME:+:$FUNCNAME()}: '
   export PS4
   set -xv
 }
@@ -178,9 +164,9 @@ exec 1>| >(set +x; _stdout "${DOTGIT_PRJ}/${THIS}" 2>/dev/null)
 # File get command
 dgcmd_fget=""
 [ -z "${dgcmd_fget}" -a -n "$(type -P curl 2>/dev/null)" ] &&
-dgcmd_fget="$(type -P curl) -sL"
+dgcmd_fget="$(type -P curl) -sL" || :
 [ -z "${dgcmd_fget}" -a -n "$(type -P wget 2>/dev/null)" ] &&
-dgcmd_fget="$(type -P wget) -qO -"
+dgcmd_fget="$(type -P wget) -qO -" || :
 [ -z "${dgcmd_fget}" ] && {
   _anort 1 "Command (curl or wget) not found."
 } || :
@@ -188,18 +174,25 @@ dgcmd_fget="$(type -P wget) -qO -"
 # Diff command
 dgcmd_diff=""
 [ -z "${dgcmd_diff}" -a -n "$(type -P diff 2>/dev/null)" ] &&
-dgcmd_diff="$(type -P diff 2>/dev/null)"
+dgcmd_diff="$(type -P diff 2>/dev/null)" || :
 [ -z "${dgcmd_diff}" ] && {
   _abort 1 "Command (diff) not found."
 } || :
 
+# Xargs command
+dgcmdxargs=""
+[ -z "${dgcmdxargs}" -a -n "$(type -P xargs 2>/dev/null)" ] &&
+dgcmdxargs="$(type -P xargs 2>/dev/null)" || :
+
 # Apply to
 case "${GITAPLY_TO}" in
 1)
-  [ -n "${GITAPLYDIR}" ] ||
-  GITAPLYDIR="${XDG_CONFIG_HOME:-${HOME}/.config}/git"
-  [ -d "${GITAPLYDIR}" ] ||
-  GITAPLYDIR="${HOME}"
+  if [ -n "${GITAPLYDIR}" ]
+  then :
+  elif [ ! -d "${XDG_CONFIG_HOME:-${HOME}/.config}" ]
+  then GITAPLYDIR="${HOME}"
+  else GITAPLYDIR="${XDG_CONFIG_HOME:-${HOME}/.config}/git"
+  fi
   ;;
 2)
   if [ -z "${GITAPLYDIR}" ]
@@ -240,20 +233,31 @@ case "${GITAPLY_TO}" in
        -d "${GITAPLYDIR}/.git/refs" ]
   then
     GITAPLY_TO=2
-  elif [ -n "${GITAPLYDIR}" -a -d "${GITAPLYDIR}/.config/git" ]
+  elif [ -n "${GITAPLYDIR}" -a \
+         -z "${GITAPLYDIR##*.git}" -a \
+         -f "${GITAPLYDIR}/config" -a \
+         -d "${GITAPLYDIR}/objects" -a \
+         -d "${GITAPLYDIR}/refs" ]
   then
-    GITAPLYDIR="${GITAPLYDIR}/.config/git"
-    GITAPLY_TO=1
-  elif [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/git" ]
-  then
-    GITAPLYDIR="${XDG_CONFIG_HOME:-$HOME/.config}/git"
-    GITAPLY_TO=1
+    GITAPLY_TO=3
+    GITAPLYDIR="${GITAPLYDIR}/info"
   else
-    GITAPLYDIR="${HOME}"
     GITAPLY_TO=1
+    if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}" ]
+    then
+      GITAPLYDIR="${XDG_CONFIG_HOME:-$HOME/.config}/git"
+    else
+      GITAPLYDIR="${HOME}"
+    fi
   fi
   ;;
 esac
+
+# with-config
+if [ -z "${WITHCONFIG:-}" -a "$(pwd)" = "${HOME}" ]
+then
+  WITHCONFIG=1
+fi
 
 # Create a work-dir if not exists
 [ -d "${dotgitwdir}" ] || {
@@ -264,21 +268,27 @@ esac
 trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
 trap "_cleanup" EXIT
 
-# git/info
-if [ "${GITAPLY_TO}" = "3" -a ! -d "${GITAPLYDIR}" ]
-then mkdir -p "${GITAPLYDIR}"
-fi &>/dev/null
+# Mkdir: 1:${HOME}/.config/git, 3:./git/info
+case "${GITAPLY_TO}" in
+1|3)
+  if [ ! -d "${GITAPLYDIR}" ]
+  then mkdir -p "${GITAPLYDIR}"
+  fi &>/dev/null
+  ;;
+*)
+  ;;
+esac
 
 # Process files
 for dotgitfile in $(
-  if [ ${WITHCONFIG} -ne 0 -a ${GITAPLY_TO} -le 1 ]
+  if [ ${WITHCONFIG:-0} -ne 0 -a ${GITAPLY_TO} -le 1 ]
   then
-    cat <<_LIST_
+cat - <<'_LIST_'
 gitconfig.global:-
 gitconfig.tmplt:-
 _LIST_
   fi || :
-  cat <<_LIST_
+cat - <<'_LIST_'
 gitattributes:core.attributesfile
 gitignore:core.excludesfile
 gitkeep.sh:-
@@ -322,19 +332,16 @@ do
     dotgitdest="${GITAPLYDIR}/${dotgitfile}"
 
     case "${GITAPLY_TO}::${dotgitdest}" in
-    3::*/.git/info/*.sh)
-      dotgitdest=""
-      ;;
-    3::*/.git/info/*ignore)
+    3::*.git/info/*ignore)
       dotgitdest="${GITAPLYDIR}/excludes"
       ;;
-    [01]::*/.config/git/*.sh)
+    [01]::*/.config/git/*.sh|3::*.git/info/*.sh)
       dotgitdest="${GITAPLYDIR}/${dotgitfile}"
       ;;
-    [01]::*/.config/git/git*|3::*/.git/info/git*)
+    [01]::*/.config/git/git*|3::*.git/info/git*)
       dotgitdest="${GITAPLYDIR}/${dotgitfile#*git}"
       ;;
-    [01]::*/.config/git/*|3::*/.git/info/*)
+    [01]::*/.config/git/*|3::*.git/info/*)
       dotgitdest="${GITAPLYDIR}/${dotgitfile}"
       ;;
     *)
@@ -354,59 +361,56 @@ do
     continue
   }
 
-  additlines=$(
-    [ -f "${dotgitdest}.proj" ] && {
-      cat "${dotgitdest}.proj"
-    } 2>/dev/null |wc -l |tr -d '\t ')
-
-  if [ ${additlines:-0} -gt 0 ]
-  then
-
-    echo "Found '${dotgitdest}.proj', ${additlines} lines."
-
-    : && {
-      cat <<_EOD_
+  case "${dotgitfile}" in
+  gitattributes|gitignore)
+    # *.proj
+    if [ "${GITAPLY_TO}" = "2" -a -f "${dotgitdest}.proj" ]
+    then additlines=$(cat "${dotgitdest}.proj" |wc -l)
+    else additlines=0
+    fi &>/dev/null
+    if [ ${additlines:-0} -gt 0 ]
+    then
+      echo "${DOTGIT_PRJ}/${THIS}: Found '${dotgitdest}.proj', ${additlines} lines." && {
+cat - <<_EOD_
 
 #
 # ${dotgitdest##*/}.proj
 #
 
 _EOD_
-      cat "${dotgitdest}.proj" 2>/dev/null
-      cat <<_EOD_
+cat "${dotgitdest}.proj" 2>/dev/null
+cat - <<_EOD_
 
 _EOD_
-    } 1>>"${dotgittemp}"
-
-  else :
-  fi || :
-
-  additlines=$(
-    [ -d "${dotgitdest}.d" ] && {
-      cat "${dotgitdest}.d"/*.conf
-    } 2>/dev/null |wc -l |tr -d '\t ')
-
-  if [ ${additlines:-0} -gt 0 ]
-  then
-
-    echo "Found '${dotgitdest}.d', ${additlines} lines."
-
-    : && {
-      cat <<_EOD_
+      } 1>>"${dotgittemp}"
+    else :
+    fi
+    # *.d/*.conf
+    if [ -d "${dotgitdest}.d" ]
+    then additlines=$(cat "${dotgitdest}.d"/*.conf |wc -l)
+    else additlines=0
+    fi &>/dev/null
+    if [ ${additlines:-0} -gt 0 ]
+    then
+      echo "${DOTGIT_PRJ}/${THIS}: Found '${dotgitdest}.d', ${additlines} lines." && {
+cat - <<_EOD_
 
 #
 # ${dotgitdest##*/}.d
 #
 
 _EOD_
-      cat "${dotgitdest}.d"/*.conf 2>/dev/null
-      cat <<_EOD_
+cat "${dotgitdest}.d"/*.conf 2>/dev/null
+cat - <<_EOD_
 
 _EOD_
-    } 1>>"${dotgittemp}"
-
-  else :
-  fi || :
+      } 1>>"${dotgittemp}"
+    else :
+    fi
+    ;;
+  *)
+    ;;
+  esac
 
   if [ ! -s "${dotgittemp}" ]
   then
@@ -416,7 +420,7 @@ _EOD_
   if [ -e "${dotgitdest}" ]
   then
     ${dgcmd_diff} -u "${dotgittemp}" "${dotgitdest}" 1>|"${dotgitdiff}" && {
-      echo "Same '${dotgittemp##*/}' and '${dotgitdest}'."
+      echo "${DOTGIT_PRJ}/${THIS}: Same '${dotgittemp##*/}' and '${dotgitdest}'."
       continue
     }
   fi
@@ -430,19 +434,19 @@ _EOD_
       *.sh) chmod a+x "${dotgitdest}" ;;
       *) ;;
       esac || :
+
       [ ${GITAPLY_TO} -le 1 -a -s "${dotgitdiff}" ] && {
         dotgitbkup="${dotgitdest}-$(date +'%Y%m%dT%H%M%S').patch"
         cat "${dotgitdiff}" 1>|"${dotgitbkup}"
       } || :
 
     } &&
-    echo "Update '${dotgitdest}'." && {
+    echo "${DOTGIT_PRJ}/${THIS}: Update '${dotgitdest}'." && {
 
-      dotgit_out=$(
-        if [ -n "${dotgitbkup}" -a -s "${dotgitbkup}" ]
-        then echo "${dotgitbkup}"
-        else echo "${dotgitdest}"
-        fi || :; )
+      if [ -n "${dotgitbkup}" -a -s "${dotgitbkup}" ]
+      then dotgit_out="${dotgitbkup}"
+      else dotgit_out="${dotgitdest}"
+      fi || :
 
     }
 
@@ -450,47 +454,87 @@ _EOD_
 
     : && {
       [ -n "${dotgitdest}" ] &&
-      echo "Copy from '${dotgittemp}' to '${dotgitdest}'."
+      echo "${DOTGIT_PRJ}/${THIS}: Copy from '${dotgittemp}' to '${dotgitdest}'."
       [ -s "${dotgitdiff}" ] &&
-      echo "Copy from '${dotgitdiff}' to '${dotgitbkup}'."
+      echo "${DOTGIT_PRJ}/${THIS}: Copy from '${dotgitdiff}' to '${dotgitbkup}'."
     } || :
 
-    dotgit_out=$(
-      if [ -n "${dotgitdiff}" -a -s "${dotgitdiff}" ]
-      then echo "${dotgitdiff}"
-      else echo "${dotgittemp}"
-      fi || :; )
+    if [ -n "${dotgitdiff}" -a -s "${dotgitdiff}" ]
+    then dotgit_out="${dotgitdiff}"
+    else dotgit_out="${dotgittemp}"
+    fi || :
 
   fi || continue
 
-  echo "${dotgit_out##*/} >>>"
-
   dotgitline=$(cat "${dotgit_out}" 2>/dev/null |wc -l)
 
-  cat -n "${dotgit_out}" |
-  if [ ${dotgitline} -gt 10 ]
-  then head -n 9; printf "%7s" ":"; echo
-  else cat
-  fi || :
+  : "Diff" && {
 
-  echo
+    echo "${dotgit_out##*/} >>>"
+
+    cat -n "${dotgit_out}" |
+    if [ ${dotgitline} -gt 10 ]
+    then head -n 9; printf "%s\t\t%s" ":" ":"; echo
+    else cat
+    fi || :
+
+    echo
+
+  } |
+  if [ -x "${dgcmdxargs:-}" ]
+  then ${dgcmdxargs} -l1 -iR echo "${DOTGIT_PRJ}/${THIS}: R"
+  else cat -
+  fi
 
 done
 
-# Make .gitconfig
-if [ ${WITHCONFIG} -ne 0 -a ${GITAPLY_TO} -le 1 ]
+# Make gitconfig
+if [ ${WITHCONFIG:-0} -ne 0 -a ${GITAPLY_TO} -le 1 ]
 then
-  if [ ! -e "${HOME}/.gitconfig" ]
+
+  gitcfgfile=""
+
+  case "${GITAPLYDIR}" in
+  */.config/git)
+    gitcfgfile="${GITAPLYDIR}/config"
+    ;;
+  *)
+    gitcfgfile="${GITAPLYDIR}/.gitconfig"
+    ;;
+  esac
+
+  if [ ! -e "${gitcfgfile}" ]
   then
+
     for cfgtmplt in "${GITAPLYDIR}/"{,.git}config.tmplt
     do
-      [ -e "${cfgtmplt}" ] && {
-        _git_config_template "${cfgtmplt}" 1>|"${HOME}/.gitconfig" &&
+      if [ -e "${cfgtmplt}" ]
+      then
+        : && {
+cat - <<_EOF_
+*
+* The with-config option was specified.
+* Generate a config file '${gitcfgfile}'.
+* Use template file '${cfgtmplt}'.
+*
+_EOF_
+          _git_config_template "${cfgtmplt}" |
+          tee "${gitcfgfile}" |cat -n
+          echo
+        } |
+        if [ -x "${dgcmdxargs:-}" ]
+        then ${dgcmdxargs} -l1 -iR echo "${DOTGIT_PRJ}/${THIS}: R"
+        else cat -
+        fi &&
         break
-      } || :
+      else :
+      fi
     done
+
   fi
-fi
+
+else :
+fi # if [ ${WITHCONFIG} -ne 0 -a ${GITAPLY_TO} -le 1 ]
 
 # End
 exit 0
