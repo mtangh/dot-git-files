@@ -58,7 +58,7 @@ _abort() {
   [[ ${1:-} =~ ^[0-9]+$ ]] && {
     exitcode="${1:-}"; shift;
   } &>/dev/null
-  echo "${DOTGIT_PRJ}/${THIS}: ERROR: $@" "(${exitcode:-1})" |_stdout 1>&2
+  echo "${DOTGIT_PRJ}/${THIS}: ERROR: $@" "(${exitcode:-1})" 1>&2
   [ ${exitcode:-1} -le 0 ] || exit ${exitcode:-1}
   return 0
 }
