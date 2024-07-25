@@ -482,7 +482,7 @@ _EOD_
 
   } |
   if [ -x "${dgcmdxargs:-}" ]
-  then ${dgcmdxargs} -l1 -iR echo "${DOTGIT_PRJ}/${THIS}: R"
+  then ${dgcmdxargs} -L1 -iR echo "${DOTGIT_PRJ}/${THIS}: R"
   else cat -
   fi
 
@@ -523,7 +523,7 @@ _EOF_
           echo
         } |
         if [ -x "${dgcmdxargs:-}" ]
-        then ${dgcmdxargs} -l1 -iR echo "${DOTGIT_PRJ}/${THIS}: R"
+        then ${dgcmdxargs} -L1 -iR echo "${DOTGIT_PRJ}/${THIS}: R"
         else cat -
         fi &&
         break
