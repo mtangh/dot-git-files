@@ -1,7 +1,9 @@
-#!/bin/bash
+#!/bin/bash -Cu
 THIS="${BASH_SOURCE##*/}"
-NAME="${THIS%.*}"
 CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
+# NAME
+THIS="${THIS:-gitfilesupdate.sh}"
+BASE="${THIS%.*}"
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
 # Install Shell

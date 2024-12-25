@@ -4,7 +4,7 @@ CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
 
 # Name
 THIS="${THIS:-update.sh}"
-NAME="${THIS%.*}"
+BASE="${THIS%.*}"
 
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
