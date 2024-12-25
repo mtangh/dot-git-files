@@ -1,36 +1,28 @@
 #!/bin/bash
-THIS="${BASH_SOURCE##*/}"
-CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" 2>/dev/null; pwd)
-
+[ -n "$BASH" ] 1>/dev/null 2>&1 || {
+echo "Run it in bash." 2>/dev/null; exit 1; }
+THIS="${0##*/}"
+CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
 # Name
 THIS="${THIS:-update.sh}"
 BASE="${THIS%.*}"
-
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
-
 # dot-git-files URL
 DOTGIT_URL="${DOTGIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
-
 # dot-ssh-files name
 DOTGIT_PRJ="${DOTGIT_URL%/master*}"
 DOTGIT_PRJ="${DOTGIT_PRJ##*/}"
-
 # Apply-to dir.
 GITAPLYDIR="${GIT_DIR:-}"
-
 # Flag: Git Project (0:auto,1:global,2:project,3:local)
 GITAPLY_TO=0
-
 # Flag: With config
 WITHCONFIG=
-
 # Flag: Xtrace
 X_TRACE_ON=0
-
 # Flag: dry-run
 DRY_RUN_ON=0
-
 # Debug
 case "${DEBUG:-NO}" in
 0|[Nn][Oo]|[Oo][Ff][Ff])
@@ -40,7 +32,6 @@ case "${DEBUG:-NO}" in
   DRY_RUN_ON=1
   ;;
 esac || :
-
 # Variables
 dotgitfile=""
 dotgitckey=""
@@ -51,7 +42,6 @@ dotgittemp=""
 dotgitdiff=""
 dotgitbkup=""
 dotgit_out=""
-
 # Abort
 _abort() {
   local exitcode=1 &>/dev/null
@@ -62,7 +52,6 @@ _abort() {
   [ ${exitcode:-1} -le 0 ] || exit ${exitcode:-1}
   return 0
 }
-
 # Cleanup
 _cleanup() {
   [ -z "${dotgitwdir:-}" ] || {
@@ -70,7 +59,6 @@ _cleanup() {
   } || :
   return 0
 }
-
 # Template
 _git_config_template() {
   local filepath="${1:-}"
@@ -105,7 +93,6 @@ _git_config_template() {
   esac || :
   return $?
 }
-
 # Parsing command line options
 while [ $# -gt 0 ]
 do
@@ -153,14 +140,12 @@ _USAGE_
   esac
   shift
 done
-
 # Enable trace, verbose
 [ ${X_TRACE_ON} -eq 0 ] || {
   PS4='>(${DOTGIT_PRJ}/${THIS}:${LINENO:--})${FUNCNAME:+:$FUNCNAME()}: '
   export PS4
   set -xv
 }
-
 # File get command
 dgcmd_fget=""
 [ -z "${dgcmd_fget}" -a -n "$(type -P curl 2>/dev/null)" ] &&
@@ -170,7 +155,6 @@ dgcmd_fget="$(type -P wget) -qO -" || :
 [ -z "${dgcmd_fget}" ] && {
   _anort 1 "Command (curl or wget) not found."
 } || :
-
 # Diff command
 dgcmd_diff=""
 [ -z "${dgcmd_diff}" -a -n "$(type -P diff 2>/dev/null)" ] &&
@@ -178,12 +162,10 @@ dgcmd_diff="$(type -P diff 2>/dev/null)" || :
 [ -z "${dgcmd_diff}" ] && {
   _abort 1 "Command (diff) not found."
 } || :
-
 # Xargs command
 dgcmdxargs=""
 [ -z "${dgcmdxargs}" -a -n "$(type -P xargs 2>/dev/null)" ] &&
 dgcmdxargs="$(type -P xargs 2>/dev/null)" || :
-
 # Apply to
 case "${GITAPLY_TO}" in
 1)
@@ -252,22 +234,18 @@ case "${GITAPLY_TO}" in
   fi
   ;;
 esac
-
 # with-config
 if [ -z "${WITHCONFIG:-}" -a "$(pwd)" = "${HOME}" ]
 then
   WITHCONFIG=1
 fi
-
 # Create a work-dir if not exists
 [ -d "${dotgitwdir}" ] || {
   mkdir -p "${dotgitwdir}" &>/dev/null
 } || :
-
 # Set trap
 trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
 trap "_cleanup" EXIT
-
 # Mkdir: 1:${HOME}/.config/git, 3:./git/info
 case "${GITAPLY_TO}" in
 1|3)
@@ -278,7 +256,6 @@ case "${GITAPLY_TO}" in
 *)
   ;;
 esac
-
 # Process files
 for dotgitfile in $(
   if [ ${WITHCONFIG:-0} -ne 0 -a ${GITAPLY_TO} -le 1 ]
@@ -501,7 +478,6 @@ _EOD_
   fi
 
 done
-
 # Make gitconfig
 if [ ${WITHCONFIG:-0} -ne 0 -a ${GITAPLY_TO} -le 1 ]
 then
@@ -549,6 +525,5 @@ _EOF_
 
 else :
 fi # if [ ${WITHCONFIG} -ne 0 -a ${GITAPLY_TO} -le 1 ]
-
 # End
 exit 0
