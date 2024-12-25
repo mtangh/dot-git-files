@@ -351,6 +351,20 @@ do
 
   fi # if [ -z "${dotgitdest}" ]
 
+  case "${dotgitfile}" in
+  *.sh) 
+    if [ -e "${GITAPLYDIR}/${dotgitfile}" -a \
+       ! -e "${GITAPLYDIR}/.${dotgitfile}" ]
+    then
+      echo "${DOTGIT_PRJ}/${THIS}: Found '${dotgitfile}', Skip update."
+      dotgit_url=""
+      dotgitdest=""
+    fi
+    ;;
+  *)
+    ;;
+  esac
+ 
   [ -n "${dotgitfile}" ] || continue
   [ -n "${dotgit_url}" ] || continue
   [ -n "${dotgittemp}" ] || continue
@@ -410,7 +424,7 @@ _EOD_
     ;;
   *)
     ;;
-  esac
+  esac # case "${dotgitfile}" in
 
   if [ ! -s "${dotgittemp}" ]
   then
