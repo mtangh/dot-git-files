@@ -1,8 +1,8 @@
 #!/bin/bash
 [ -n "$BASH" ] 1>/dev/null 2>&1 || {
 echo "Run it in bash." 2>/dev/null; exit 1; }
-THIS="${0##*/}"
-CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
+THIS="${BASH_SOURCE##*/}"
+CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
 # Name
 THIS="${THIS:-update.sh}"
 BASE="${THIS%.*}"
@@ -36,6 +36,7 @@ esac || :
 dotgitfile=""
 dotgitckey=""
 dotgitdest=""
+dotgitbase=""
 dotgit_url=""
 dotgitwdir="${TMPDIR:-/tmp}/.${DOTGIT_PRJ}.$$"
 dotgittemp=""
@@ -243,6 +244,14 @@ fi
 [ -d "${dotgitwdir}" ] || {
   mkdir -p "${dotgitwdir}" &>/dev/null
 } || :
+# dot-git-files URL base
+[ -n "${CDIR}" -a -d "${CDIR}/.git" ] &&
+( cd "${CDIR}" &&
+  git config --get remote.origin.url |
+  egrep '/dot-git-files[.]git$'; ) &>/dev/null &&
+  dotgitbase="file://${CDIR}" || :
+[ -n "${dotgitbase:-}" ] ||
+  dotgitbase="${DOTGIT_URL}"
 # Set trap
 trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
 trap "_cleanup" EXIT
@@ -282,7 +291,7 @@ do
   [ -n "${dotgitckey}" ] &&
   dotgitfile="${dotgitfile%%:*}"
 
-  dotgit_url="${DOTGIT_URL}/${dotgitfile}"
+  dotgit_url="${dotgitbase}/${dotgitfile}"
   dotgittemp="${dotgitwdir}/${dotgitfile}"
   dotgitdiff="${dotgitwdir}/${dotgitfile}.patch"
   dotgitbkup=""
@@ -310,15 +319,18 @@ do
 
     case "${GITAPLY_TO}::${dotgitdest}" in
     3::*.git/info/*ignore)
-      dotgitdest="${GITAPLYDIR}/excludes"
+      dotgitdest="${GITAPLYDIR}/exclude"
       ;;
-    [01]::*/.config/git/*.sh|3::*.git/info/*.sh)
+    3::*.git/info/*.sh)
+      dotgitdest=""
+      ;;
+    [01]::*/.config/git/*.sh)
       dotgitdest="${GITAPLYDIR}/${dotgitfile}"
       ;;
     [01]::*/.config/git/git*|3::*.git/info/git*)
       dotgitdest="${GITAPLYDIR}/${dotgitfile#*git}"
       ;;
-    [01]::*/.config/git/*|3::*.git/info/*)
+    [01]::*/.config/git/*)
       dotgitdest="${GITAPLYDIR}/${dotgitfile}"
       ;;
     *)
@@ -328,8 +340,9 @@ do
 
   fi # if [ -z "${dotgitdest}" ]
 
+  [ -z "${dotgitdest}" ] ||
   case "${dotgitfile}" in
-  *.sh) 
+  *.sh)
     if [ -e "${GITAPLYDIR}/${dotgitfile}" -a \
        ! -e "${GITAPLYDIR}/.${dotgitfile}" ]
     then
@@ -341,7 +354,7 @@ do
   *)
     ;;
   esac
- 
+
   [ -n "${dotgitfile}" ] || continue
   [ -n "${dotgit_url}" ] || continue
   [ -n "${dotgittemp}" ] || continue
@@ -521,7 +534,7 @@ _EOF_
       fi
     done
 
-  fi
+  fi # if [ ! -e "${gitcfgfile}" ]
 
 else :
 fi # if [ ${WITHCONFIG} -ne 0 -a ${GITAPLY_TO} -le 1 ]

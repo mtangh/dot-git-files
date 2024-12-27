@@ -6,7 +6,7 @@ CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
 # Run tests
 echo "[${tests_name}] Basic syntax check" && {
 
-  bash -n "${tests_wdir}/gitkeep.sh" &&
+  bash -n "${tests_cdir}/gitkeep.sh" &&
   : "OK"
 
 } &&
@@ -19,7 +19,7 @@ echo "[${tests_name}] Gitkeeping" && {
 
     touch t/dir1/file1.txt &&
     touch t/dir3/child1/file2.txt &&
-    bash -x -- "${tests_wdir}/gitkeep.sh" ./t &&
+    bash -x -- "${tests_cdir}/gitkeep.sh" ./t &&
     [ ! -r "t/dir1/.gitkeep" ] &&
     [   -r "t/dir2/.gitkeep" ] &&
     [ ! -r "t/dir3/child1/.gitkeep" ] &&
@@ -31,7 +31,7 @@ echo "[${tests_name}] Gitkeeping" && {
 
     mv -f t/dir{1,2}/file1.txt &&
     mv -f t/dir3/child{1,2}/file2.txt &&
-    bash -x -- "${tests_wdir}/gitkeep.sh" --rebuild ./t &&
+    bash -x -- "${tests_cdir}/gitkeep.sh" --rebuild ./t &&
     [   -r "t/dir1/.gitkeep" ] &&
     [ ! -r "t/dir2/.gitkeep" ] &&
     [   -r "t/dir3/child1/.gitkeep" ] &&

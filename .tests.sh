@@ -9,19 +9,27 @@ tests_cseq=0
 # Result of test case
 tests_rval=0
 
+# Tests Dir.
+rm -rf "${CDIR}/t" 2>/dev/null || :
+mkdir -p "${CDIR}/t" 2>/dev/null || :
+
 # Run tests
 for tests_sh in "${CDIR}"/.tests.d/*.sh
 do
-  
+
   tests_cseq=$((++tests_cseq))
   tests_name="${tests_sh##*/}"
   tests_name="${tests_name%.sh*}"
-  xtrace_out="${tests_sh%.sh*}.xtrace.log"
+  xtrace_out="${tests_name}.xtrace.log"
   echo "[${tests_name}] Start the test."
-  BASH_XTRACEFD=3 \
-  tests_name="${tests_name}" \
-  tests_wdir="${CDIR}" \
-  bash -x "${tests_sh}" 3>"${xtrace_out}" || {
+  mkdir -p "${CDIR}/t/${tests_name}" &>/dev/null || :
+  ( cd "${CDIR}/t/${tests_name}" && {
+    BASH_XTRACEFD=3 \
+    tests_name="${tests_name}" \
+    tests_cdir="${CDIR}" \
+    tests_wdir="${CDIR}/t/${tests_name}" \
+    bash -x "${tests_sh}" 3>"${xtrace_out}" 2>&3
+   }; ) || {
     tests_rval=$?
     echo
     echo "[${tests_name}] This test failed."

@@ -1,8 +1,8 @@
 #!/bin/bash
 [ -n "$BASH" ] 1>/dev/null 2>&1 || {
 echo "Run it in bash." 2>/dev/null; exit 1; }
-THIS="${0##*/}"
-CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
+THIS="${BASH_SOURCE##*/}"
+CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
 # Name
 THIS="${THIS:-gitkeep.sh}"
 BASE="${THIS%.*}"
@@ -54,7 +54,7 @@ _get_dir_list() {
 # function: Echo
 _echo() {
   [ ${_quietly:-0} -eq 0 ] && {
-    echo "${NAME}: $@"
+    echo "${BASE}: $@"
   } 2>/dev/null || :
   return 0
 }
