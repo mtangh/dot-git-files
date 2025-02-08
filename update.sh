@@ -1,11 +1,12 @@
 #!/bin/bash
 [ -n "$BASH" ] 1>/dev/null 2>&1 || {
-echo "Run it in bash." 2>/dev/null; exit 1; }
-THIS="${BASH_SOURCE##*/}"
-CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
+echo "Run it in bash." 1>&2; exit 1; }
+THIS="${BASH_SOURCE}"
+NAME="${THIS##*/}"
+CDIR=$([ -n "${THIS%/*}" ] && cd "${THIS%/*}" &>/dev/null; pwd)
 # Name
-THIS="${THIS:-update.sh}"
-BASE="${THIS%.*}"
+NAME="${NAME:-update.sh}"
+BASE="${NAME%.*}"
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
 # dot-git-files URL
@@ -43,24 +44,35 @@ dotgittemp=""
 dotgitdiff=""
 dotgitbkup=""
 dotgit_out=""
-# Abort
+# Function: Stdout
+_stdout() {
+  local ltag="${1:-$NAME}"
+  local line=""
+  cat - | while IFS= read line
+  do
+    [[ "${line}" =~ ^${ltag}: ]] ||
+    printf "${ltag}: "; echo "${line}"
+  done
+  return 0
+}
+# Function: Abort
 _abort() {
   local exitcode=1 &>/dev/null
   [[ ${1:-} =~ ^[0-9]+$ ]] && {
-    exitcode="${1:-}"; shift;
+    exitcode="${1}"; shift;
   } &>/dev/null
-  echo "${DOTGIT_PRJ}/${THIS}: ERROR: $@" "(${exitcode:-1})" 1>&2
+  echo "ERROR: $@" "(${exitcode:-1})" |_stdout 1>&2
   [ ${exitcode:-1} -le 0 ] || exit ${exitcode:-1}
   return 0
 }
-# Cleanup
+# Function: Cleanup
 _cleanup() {
   [ -z "${dotgitwdir:-}" ] || {
     rm -rf "${dotgitwdir:-}" &>/dev/null
   } || :
   return 0
 }
-# Template
+# Function: Template
 _git_config_template() {
   local filepath="${1:-}"
   local git_user="${GIT_USER_NAME:-}"
@@ -127,7 +139,7 @@ do
     ;;
   -h|-help*|--help*)
 cat - <<_USAGE_
-Usage: ${DOTGIT_PRJ}/${THIS}: [--global|--project|--local] [--with-config|--without-config]
+Usage: ${DOTGIT_PRJ}/${NAME}: [--global|--project|--local] [--with-config|--without-config]
 
 _USAGE_
     exit 0
@@ -143,10 +155,8 @@ _USAGE_
 done
 # Enable trace, verbose
 [ ${X_TRACE_ON} -eq 0 ] || {
-  PS4='>(${DOTGIT_PRJ}/${THIS}:${LINENO:--})${FUNCNAME:+:$FUNCNAME()}: '
-  export PS4
-  set -xv
-}
+  PS4='>(${DOTGIT_PRJ}/${NAME}:${LINENO:--})${FUNCNAME:+:$FUNCNAME()}: '
+  export PS4; set -xv; }
 # File get command
 dgcmd_fget=""
 [ -z "${dgcmd_fget}" -a -n "$(type -P curl 2>/dev/null)" ] &&
@@ -346,7 +356,7 @@ do
     if [ -e "${GITAPLYDIR}/${dotgitfile}" -a \
        ! -e "${GITAPLYDIR}/.${dotgitfile}" ]
     then
-      echo "${DOTGIT_PRJ}/${THIS}: Found '${dotgitfile}', Skip update."
+      echo "${DOTGIT_PRJ}/${NAME}: Found '${dotgitfile}', Skip update."
       dotgit_url=""
       dotgitdest=""
     fi
@@ -374,7 +384,7 @@ do
     fi &>/dev/null
     if [ ${additlines:-0} -gt 0 ]
     then
-      echo "${DOTGIT_PRJ}/${THIS}: Found '${dotgitdest}.proj', ${additlines} lines." && {
+      echo "${DOTGIT_PRJ}/${NAME}: Found '${dotgitdest}.proj', ${additlines} lines." && {
 cat - <<_EOD_
 
 #
@@ -396,7 +406,7 @@ _EOD_
     fi &>/dev/null
     if [ ${additlines:-0} -gt 0 ]
     then
-      echo "${DOTGIT_PRJ}/${THIS}: Found '${dotgitdest}.d', ${additlines} lines." && {
+      echo "${DOTGIT_PRJ}/${NAME}: Found '${dotgitdest}.d', ${additlines} lines." && {
 cat - <<_EOD_
 
 #
@@ -424,7 +434,7 @@ _EOD_
   if [ -e "${dotgitdest}" ]
   then
     ${dgcmd_diff} -u "${dotgittemp}" "${dotgitdest}" 1>|"${dotgitdiff}" && {
-      echo "${DOTGIT_PRJ}/${THIS}: Same '${dotgittemp##*/}' and '${dotgitdest}'."
+      echo "${DOTGIT_PRJ}/${NAME}: Same '${dotgittemp##*/}' and '${dotgitdest}'."
       continue
     }
   fi
@@ -445,7 +455,7 @@ _EOD_
       } || :
 
     } &&
-    echo "${DOTGIT_PRJ}/${THIS}: Update '${dotgitdest}'." && {
+    echo "${DOTGIT_PRJ}/${NAME}: Update '${dotgitdest}'." && {
 
       if [ -n "${dotgitbkup}" -a -s "${dotgitbkup}" ]
       then dotgit_out="${dotgitbkup}"
@@ -458,9 +468,9 @@ _EOD_
 
     : && {
       [ -n "${dotgitdest}" ] &&
-      echo "${DOTGIT_PRJ}/${THIS}: Copy from '${dotgittemp}' to '${dotgitdest}'."
+      echo "${DOTGIT_PRJ}/${NAME}: Copy from '${dotgittemp}' to '${dotgitdest}'."
       [ -s "${dotgitdiff}" ] &&
-      echo "${DOTGIT_PRJ}/${THIS}: Copy from '${dotgitdiff}' to '${dotgitbkup}'."
+      echo "${DOTGIT_PRJ}/${NAME}: Copy from '${dotgitdiff}' to '${dotgitbkup}'."
     } || :
 
     if [ -n "${dotgitdiff}" -a -s "${dotgitdiff}" ]
@@ -486,7 +496,7 @@ _EOD_
 
   } |
   if [ -x "${dgcmdxargs:-}" ]
-  then ${dgcmdxargs} -L1 -IR echo "${DOTGIT_PRJ}/${THIS}: R"
+  then ${dgcmdxargs} -L1 -IR echo "${DOTGIT_PRJ}/${NAME}: R"
   else cat -
   fi
 
@@ -526,7 +536,7 @@ _EOF_
           echo
         } |
         if [ -x "${dgcmdxargs:-}" ]
-        then ${dgcmdxargs} -L1 -IR echo "${DOTGIT_PRJ}/${THIS}: R"
+        then ${dgcmdxargs} -L1 -IR echo "${DOTGIT_PRJ}/${NAME}: R"
         else cat -
         fi &&
         break

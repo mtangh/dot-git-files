@@ -1,11 +1,12 @@
 #!/bin/bash
-[ -n "$BASH" ] 1>/dev/null 2>&1 || {
-echo "Run it in bash." 2>/dev/null; exit 1; }
-THIS="${BASH_SOURCE##*/}"
-CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
+[ "$0" = "$BASH_SOURCE" ] &>/dev/null || {
+echo "Run it directly" 1>&2; exit 1; }
+THIS="${BASH_SOURCE}"
+NAME="${THIS##*/}"
+CDIR=$([ -n "${THIS%/*}" ] && cd "${THIS%/*}" &>/dev/null; pwd)
 # Name
-THIS="${THIS:-gitkeep.sh}"
-BASE="${THIS%.*}"
+NAME="${NAME:-update.sh}"
+BASE="${NAME%.*}"
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
 # Base directories.
@@ -23,7 +24,7 @@ _debug_f=0
 usage() {
   local exitstat="${1:-1}"
 cat - <<_USAGE_ 2/dev/null
-Usage: ${THIS} [OPTION] [dir...]
+Usage: ${NAME} [OPTION] [dir...]
 
 OPTION:
 -R,--rebuild
@@ -90,7 +91,7 @@ do
       # Base dir
       gkbasedirs="${gkbasedirs}${1:-}\n"
     else
-      echo "${THIS}: '${1:-}': no such file or directory." 1>&2
+      echo "${NAME}: '${1:-}': no such file or directory." 1>&2
       exit 2
     fi
     ;;

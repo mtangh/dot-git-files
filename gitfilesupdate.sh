@@ -1,11 +1,12 @@
 #!/bin/bash
-[ -n "$BASH" ] 1>/dev/null 2>&1 || {
-echo "Run it in bash." 2>/dev/null; exit 1; }
-THIS="${BASH_SOURCE##*/}"
-CDIR=$([ -n "${BASH_SOURCE%/*}" ] && cd "${BASH_SOURCE%/*}" &>/dev/null; pwd)
-# NAME
-THIS="${THIS:-gitfilesupdate.sh}"
-BASE="${THIS%.*}"
+[ "$0" = "$BASH_SOURCE" ] &>/dev/null || {
+echo "Run it directly" 1>&2; exit 1; }
+THIS="${BASH_SOURCE}"
+NAME="${THIS##*/}"
+CDIR=$([ -n "${THIS%/*}" ] && cd "${THIS%/*}" &>/dev/null; pwd)
+# Name
+NAME="${NAME:-gitfilesupdate.sh}"
+BASE="${NAME%.*}"
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
 # Install Shell
