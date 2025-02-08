@@ -3,12 +3,14 @@
 echo "Run it in bash." 1>&2; exit 1; }
 THIS="${BASH_SOURCE}"
 NAME="${THIS##*/}"
-CDIR=$([ -n "${THIS%/*}" ] && cd "${THIS%/*}" &>/dev/null; pwd)
-# Name
 NAME="${NAME:-update.sh}"
 BASE="${NAME%.*}"
+CDIR=$([ -n "${THIS%/*}" ] && cd "${THIS%/*}" &>/dev/null || :; pwd)
 # Prohibits overwriting by redirect and use of undefined variables.
 set -Cu
+# The return value of a pipeline is the value of the last command to
+# exit with a non-zero status.
+set -o pipefail
 # dot-git-files URL
 DOTGIT_URL="${DOTGIT_URL:-https://raw.githubusercontent.com/mtangh/dot-git-files/master}"
 # dot-ssh-files name
@@ -48,20 +50,25 @@ dotgit_out=""
 _stdout() {
   local ltag="${1:-$NAME}"
   local line=""
-  cat - | while IFS= read line
+  cat - | while IFS= read -r line
   do
     [[ "${line}" =~ ^${ltag}: ]] ||
-    printf "${ltag}: "; echo "${line}"
+    printf "%s: " "${ltag}"; echo "${line}"
   done
   return 0
+}
+# Function: Echo
+_echo() {
+  echo "$@" |_stdout
 }
 # Function: Abort
 _abort() {
   local exitcode=1 &>/dev/null
+  local messages="$@"
   [[ ${1:-} =~ ^[0-9]+$ ]] && {
     exitcode="${1}"; shift;
   } &>/dev/null
-  echo "ERROR: $@" "(${exitcode:-1})" |_stdout 1>&2
+  echo "ERROR: ${messages} (${exitcode:-1})" |_stdout 1>&2
   [ ${exitcode:-1} -le 0 ] || exit ${exitcode:-1}
   return 0
 }
@@ -87,7 +94,7 @@ _git_config_template() {
     gitemail="$(id -un 2>/dev/null)@$(hostname -f 2>/dev/null)"
     git_conf="${filepath%.*}.global"
     echo "${filepath}" |
-    egrep '^'"${HOME}" &>/dev/null && {
+    grep -E '^'"${HOME}" &>/dev/null && {
       git_conf="~${git_conf##*$HOME}"
     } || :
     cat "${filepath}" |
@@ -258,7 +265,7 @@ fi
 [ -n "${CDIR}" -a -d "${CDIR}/.git" ] &&
 ( cd "${CDIR}" &&
   git config --get remote.origin.url |
-  egrep '/dot-git-files[.]git$'; ) &>/dev/null &&
+  grep -E '/dot-git-files[.]git$'; ) &>/dev/null &&
   dotgitbase="file://${CDIR}" || :
 [ -n "${dotgitbase:-}" ] ||
   dotgitbase="${DOTGIT_URL}"
