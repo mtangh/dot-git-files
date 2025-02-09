@@ -1,7 +1,7 @@
 #!/bin/bash
-[ "$0" = "$BASH_SOURCE" ] 1>/dev/null 2>&1 || {
-echo "Run it directory." 1>&2; exit 1; }
-THIS="${BASH_SOURCE}"
+[ -n "$BASH" ] 1>/dev/null 2>&1 || {
+echo "Run it in bash." 1>&2; exit 1; }
+THIS="${BASH_SOURCE:-./gitfilesupdate.sh}"
 NAME="${THIS##*/}"
 BASE="${NAME%.*}"
 CDIR=$([ -n "${THIS%/*}" ] && cd "${THIS%/*}" &>/dev/null || :; pwd)
