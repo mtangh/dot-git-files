@@ -37,6 +37,6 @@ http*)
 esac
 # Run
 [ -n "${scriptget}" ] &&
-${scriptget} "${installsh}" 2>/dev/null |/bin/bash ${shellopts} "$@"
+${scriptget} "${installsh}" 2>/dev/null |${BASH} ${shellopts} "$@"
 # End
 exit $?
