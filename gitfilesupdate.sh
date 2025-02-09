@@ -11,12 +11,13 @@ set -Cu
 # exit with a non-zero status.
 set -o pipefail
 # Install Shell
-[ -s "${CDIR}/update.sh" ] &&
+installsh="${DOT_GIT_FILES_INSTALL_SH:-}"
+[ -z "${installsh}" -a -s "${CDIR}/update.sh" ] &&
 installsh="${CDIR}/update.sh" || :
-[ -s "${CDIR}/update.sh" ] || {
+[ -z "${installsh}" -a ! -s "${CDIR}/update.sh" ] && {
 installsh="https://raw.githubusercontent.com"
 installsh="${installsh}/mtangh/dot-git-files"
-installsh="${installsh}/master/update.sh"; }
+installsh="${installsh}/master/update.sh"; } || :
 # Shell opts
 shellopts="-s --"
 [ -n "${SHELLOPTS:-}" ] &&
