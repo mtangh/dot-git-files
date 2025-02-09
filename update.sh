@@ -555,6 +555,9 @@ _EOF_
 
   fi # if [ ! -e "${gitcfgfile}" ]
 
+  # Finish update
+  _echo "Done."
+
 else :
 fi # if [ ${WITHCONFIG} -ne 0 -a ${GITAPLY_TO} -le 1 ]
 # End
