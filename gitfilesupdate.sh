@@ -31,13 +31,13 @@ http*)
   scriptget="$(type -P curl 2>/dev/null) -sL" || :
   [ -z "${scriptget}" -a  -n "$(type -P wget 2>/dev/null)" ] &&
   scriptget="$(type -P wget 2>/dev/null) -qO -" || :
+  # Run
+  [ -n "${scriptget}" ] &&
+  ${scriptget} "${installsh}" 2>/dev/null |${BASH} ${shellopts} "$@"
   ;;
 *)
-  scriptget="cat"
+  ${BASH} ${shellopts##*-s --} "${installsh}" "$@" 2>/dev/null
   ;;
 esac
-# Run
-[ -n "${scriptget}" ] &&
-${scriptget} "${installsh}" 2>/dev/null |${BASH} ${shellopts} "$@"
 # End
 exit $?
