@@ -33,7 +33,7 @@ X_TRACE_ON=0
 DRY_RUN_ON=0
 # Function: Stdout
 _stdout() {
-  local ltag="${1:-$NAME}"
+  local ltag="${1:-$GIT_PROJNAME/$NAME}"
   local line=""
   cat - | while IFS= read -r line
   do
@@ -373,7 +373,7 @@ do
     if [ -e "${INSTALL_PREFIX}/${dotgitfile}" -a \
        ! -e "${INSTALL_PREFIX}/.${dotgitfile}" ]
     then
-      echo "${GIT_PROJNAME}/${NAME}: Found '${dotgitfile}', Skip update."
+      _echo "Found '${dotgitfile}', Skip update."
       dotgit_url=""
       dotgitdest=""
     fi
@@ -401,7 +401,7 @@ do
     fi &>/dev/null
     if [ ${additlines:-0} -gt 0 ]
     then
-      echo "${GIT_PROJNAME}/${NAME}: Found '${dotgitdest}.proj', ${additlines} lines." && {
+      _echo "Found '${dotgitdest}.proj', ${additlines} lines." && {
 cat - <<_EOD_
 
 #
@@ -423,7 +423,7 @@ _EOD_
     fi &>/dev/null
     if [ ${additlines:-0} -gt 0 ]
     then
-      echo "${GIT_PROJNAME}/${NAME}: Found '${dotgitdest}.d', ${additlines} lines." && {
+      _echo "Found '${dotgitdest}.d', ${additlines} lines." && {
 cat - <<_EOD_
 
 #
@@ -451,7 +451,7 @@ _EOD_
   if [ -e "${dotgitdest}" ]
   then
     ${diff_cmd} -u "${dotgittemp}" "${dotgitdest}" 1>|"${dotgitdiff}" && {
-      echo "${GIT_PROJNAME}/${NAME}: Same '${dotgittemp##*/}' and '${dotgitdest}'."
+      _echo "Same '${dotgittemp##*/}' and '${dotgitdest}'."
       continue
     }
   fi
@@ -472,7 +472,7 @@ _EOD_
       } || :
 
     } &&
-    echo "${GIT_PROJNAME}/${NAME}: Update '${dotgitdest}'." && {
+    _echo "Update '${dotgitdest}'." && {
 
       if [ -n "${dotgitbkup}" -a -s "${dotgitbkup}" ]
       then dotgit_out="${dotgitbkup}"
@@ -485,9 +485,9 @@ _EOD_
 
     : && {
       [ -n "${dotgitdest}" ] &&
-      echo "${GIT_PROJNAME}/${NAME}: Copy from '${dotgittemp}' to '${dotgitdest}'."
+      _echo "Copy from '${dotgittemp}' to '${dotgitdest}'."
       [ -s "${dotgitdiff}" ] &&
-      echo "${GIT_PROJNAME}/${NAME}: Copy from '${dotgitdiff}' to '${dotgitbkup}'."
+      _echo "Copy from '${dotgitdiff}' to '${dotgitbkup}'."
     } || :
 
     if [ -n "${dotgitdiff}" -a -s "${dotgitdiff}" ]
