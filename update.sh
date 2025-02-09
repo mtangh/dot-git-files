@@ -256,7 +256,7 @@ cat - <<_MSG_ |_stdout
 GITAPLY_TO=[${GITAPLY_TO}] (0:auto,1:global,2:project,3:local)
 _MSG_
 # dot-git-files URL base
-if [ -n "${CDIR}" -a -d "${CDIR}/.git" ]
+if [ -n "${CDIR}" -a -e "${CDIR}/.git" ]
 then
   ( cd "${CDIR}" &&
     "${git_cmnd}" config --get remote.origin.url |
