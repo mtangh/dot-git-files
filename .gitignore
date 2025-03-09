@@ -41,7 +41,9 @@
 *.old
 logs
 *.log
-*.log*
+*.log.*
+*.log_*
+*.log-*
 *.autosave
 *~.nib/
 ## MS Office
