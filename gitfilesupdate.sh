@@ -10,14 +10,14 @@ set -Cu
 # The return value of a pipeline is the value of the last command to
 # exit with a non-zero status.
 set -o pipefail
-# Install Shell
-installsh="${DOT_GIT_FILES_INSTALL_SH:-}"
-[ -z "${installsh}" -a -s "${CDIR}/update.sh" ] &&
-installsh="${CDIR}/update.sh" || :
-[ -z "${installsh}" -a ! -s "${CDIR}/update.sh" ] && {
-installsh="https://raw.githubusercontent.com"
-installsh="${installsh}/mtangh/dot-git-files"
-installsh="${installsh}/master/update.sh"; } || :
+# Script URI
+scripturi="${DOT_GIT_FILES_INSTALL_SH:-}"
+[ -z "${scripturi}" -a -s "${CDIR}/update.sh" ] &&
+scripturi="${CDIR}/update.sh" || :
+[ -z "${scripturi}" -a ! -s "${CDIR}/update.sh" ] && {
+scripturi="https://raw.githubusercontent.com"
+scripturi="${scripturi}/mtangh/dot-git-files"
+scripturi="${scripturi}/master/update.sh"; } || :
 # Shell opts
 shellopts="-s --"
 [ -n "${SHELLOPTS:-}" ] &&
@@ -25,19 +25,17 @@ shellopts="-s --"
 shellopts="-x ${shellopts}"
 # Get Command
 scriptget=""
-case "${installsh:-}" in
-http*)
+case "${scripturi:-}" in
+http://*|https://*)
   [ -z "${scriptget}" -a -n "$(type -P curl 2>/dev/null)" ] &&
   scriptget="$(type -P curl 2>/dev/null) -sL" || :
   [ -z "${scriptget}" -a  -n "$(type -P wget 2>/dev/null)" ] &&
   scriptget="$(type -P wget 2>/dev/null) -qO -" || :
-  # Run
-  [ -n "${scriptget}" ] &&
-  ${scriptget} "${installsh}" 2>/dev/null |${BASH} ${shellopts} "$@"
   ;;
 *)
-  ${BASH} ${shellopts##*-s --} "${installsh}" "$@" 2>/dev/null
+  scriptget="cat"
   ;;
 esac
+${scriptget} "${scripturi}" |exec ${BASH} ${shellopts} "$@"
 # End
 exit $?
