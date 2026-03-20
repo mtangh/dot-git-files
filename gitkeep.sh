@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2015,SC2034,SC2086,SC2128
 [ "$0" = "$BASH_SOURCE" ] 1>/dev/null 2>&1 || {
 echo "Run it directory." 1>&2; exit 1; }
 THIS="${BASH_SOURCE}"
@@ -41,7 +42,7 @@ _USAGE_
 # function: dir list
 _get_dir_list() {
   local _dirpath=""
-  while read _dirpath
+  while read -r _dirpath
   do
     [[ ${_dirpath} =~ ^$ ]] ||
     [[ ${_dirpath} =~ /$ ]] && {
@@ -55,17 +56,17 @@ _get_dir_list() {
 }
 # function: Echo
 _echo() {
-  local messages="$@"
-  [ ${_quietly:-0} -eq 0 ] && {
+  local messages="$*"
+  [ "${_quietly:-0}" -eq 0 ] && {
     echo "${BASE}: ${messages}"
-  } 2>/dev/null || :
+  } 2>/dev/null
   return 0
 }
 # function: Verbose
 _verbose() {
-  [ ${_verbose:-0} -ne 0 ] && {
+  [ "${_verbose:-0}" -ne 0 ] && {
     _echo "$@";
-  } 2>/dev/null || :
+  } 2>/dev/null
   return 0
 }
 
@@ -122,18 +123,18 @@ gk_base_dir=""
 gk_keep_dir=""
 
 # Cleanup
-[ ${_cleanup:-0} -ne 0 ] && {
+[ "${_cleanup:-0}" -ne 0 ] && {
   # find cmd
   _findcmd=$(
     [ ${_dry_run:-0} -eq 0 ] && echo "rm -f"
     [ ${_dry_run:-0} -eq 0 ] || echo "echo"; )
   # Remove gitkeep
-  while read gk_base_dir
+  while read -r gk_base_dir
   do
     # Print
     _echo "Cleanup: '${gk_base_dir}'."
     # Find 'gitkeep' file under the gk_base_dir and remove it.
-    while read _printent
+    while read -r _printent
     do
       _verbose "Cleanup: '${_printent}'."
     done < <(
@@ -143,30 +144,29 @@ gk_keep_dir=""
       ) 2>/dev/null
   done < <(_get_dir_list)
   # Rebuild ?
-  [ ${_rebuild:-0} -eq 0 ] && {
-    exit 0; } || :
-} || : # [ ${_cleanup:-0} -ne 0 ]
+  [ "${_rebuild:-0}" -eq 0 ] && {
+    exit 0; }
+} # [ ${_cleanup:-0} -ne 0 ]
 
 # Process dirs
-while read gk_base_dir
+while read -r gk_base_dir
 do
   # print
   _echo "Gitkeep directory '${gk_base_dir}'."
   # Each empty dirs
-  while read gk_keep_dir
+  while read -r gk_keep_dir
   do
     # print
     _verbose "#1 Check dir '${gk_keep_dir}'"
     # Ignore
     [[ "${gk_keep_dir}" \
        =~ ^(/.+|\.+|(.*/){0,1}\.(git|svn|cvs|hg)(/.*){0,1})$ ]] &&
-      continue || :
+      continue
     # print
     _verbose "#2 Dir '${gk_keep_dir}' is gitkeeping."
     # gitkeep
-    [ ${_dry_run:-0} -eq 0 ] && {
-      touch "${gk_keep_dir}/${gk_tagname}"
-    } || :
+    [ "${_dry_run:-0}" -eq 0 ] &&
+    touch "${gk_keep_dir}/${gk_tagname}"
     # print
     _echo "+ '${gk_keep_dir}'"
   done < <(

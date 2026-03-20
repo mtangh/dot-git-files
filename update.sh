@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2015,SC2034,SC2120,SC2124,SC2128,SC2166
+# shellcheck disable=SC2015,SC2034,SC2064,SC2120,SC2124,SC2128,SC2166
 [ -n "$BASH" ] 1>/dev/null 2>&1 || {
 echo "Run it in bash." 1>&2; exit 1; }
 THIS="${BASH_SOURCE:-./update.sh}"
@@ -24,7 +24,7 @@ INSTALL_PREFIX="${INSTALL_PREFIX:-}"
 INSTALL_SOURCE="${INSTALL_SOURCE:-}"
 # Install Workdir
 [ -n "${INSTALLWORKDIR:-}" ] ||
-INSTALLWORKDIR="$(cd ${TMPDIR:-/tmp} || :;pwd)/${GIT_PROJNAME}.$$"
+INSTALLWORKDIR="$(cd "${TMPDIR:-/tmp}" || :; pwd)/${GIT_PROJNAME}.$$"
 # Timestamp
 INSTALL_TIMEST="$(date +'%Y%m%dT%H%M%S')"
 # Flag: Xtrace
@@ -54,14 +54,7 @@ _abort() {
     exitcode="${1}"; shift;
   } &>/dev/null
   echo "ERROR: ${messages} (${exitcode:-1})" |_stdout 1>&2
-  [ ${exitcode:-1} -le 0 ] || exit ${exitcode:-1}
-  return 0
-}
-# Function: Cleanup
-_cleanup() {
-  [ -z "${INSTALLWORKDIR:-}" ] || {
-    rm -rf "${INSTALLWORKDIR:-}" &>/dev/null
-  } || :
+  [ "${exitcode:-1}" -le 0 ] || exit "${exitcode:-1}"
   return 0
 }
 # Function: usage
@@ -93,13 +86,13 @@ _git_config_template() {
       [ -n "${gitemail}" ] || gitemail="$(id -un)@$(hostname -f)"
       git_conf="${filepath%.*}.global"
       echo "${filepath}" |grep -E '^'"${HOME}" && {
-        git_conf="~${git_conf##*$HOME}"; } || :
+        git_conf="~${git_conf##*"$HOME"}"; } || :
     } &>/dev/null
-    cat "${filepath}" |sed -r \
+    sed -E \
       -e 's/GIT_USER_NAME/'"${git_user}"'/g' \
       -e 's/GIT_USER_EMAIL/'"${gitemail}"'/g' \
       -e 's;GIT_CONFIG_PATH;'"${git_conf}"';g' \
-      2>/dev/null || :
+      <"${filepath}" 2>/dev/null || :
     [ -d "${filepath}.d" ] && {
       echo; cat "${filepath}.d"/* 2>/dev/null; }
   fi || :
@@ -175,8 +168,9 @@ done
 # Set trap
 : "Trap" && {
   # Set trap
-  trap "_cleanup" SIGTERM SIGHUP SIGINT SIGQUIT
-  trap "_cleanup" EXIT
+  trap "rm -rf '${INSTALLWORKDIR:-X}'1>/dev/null 2>&1" \
+    SIGTERM SIGHUP SIGINT SIGQUIT \
+    EXIT
 } || :
 # Print message
 cat - <<_MSG_ |_stdout
@@ -335,7 +329,7 @@ do
     else dotgitckey="--global ${dotgitckey}"
     fi
 
-    eval "dotgitdest=$(${git_cmnd} config ${dotgitckey})"
+    eval "dotgitdest=$(${git_cmnd} config "${dotgitckey}")"
 
   fi # if [ ${GITAPLY_TO} -ne 2 ] && ...
 
@@ -396,10 +390,10 @@ do
   gitattributes|gitignore)
     # *.proj
     if [ "${GITAPLY_TO}" = "2" -a -f "${dotgitdest}.proj" ]
-    then additlines=$(cat "${dotgitdest}.proj" |wc -l)
+    then additlines=$(wc -l <"${dotgitdest}.proj" 2>/dev/null)
     else additlines=0
     fi &>/dev/null
-    if [ ${additlines:-0} -gt 0 ]
+    if [ "${additlines:-0}" -gt 0 ]
     then
       _echo "Found '${dotgitdest}.proj', ${additlines} lines." && {
 cat - <<_EOD_
@@ -421,7 +415,7 @@ _EOD_
     then additlines=$(cat "${dotgitdest}.d"/*.conf |wc -l)
     else additlines=0
     fi &>/dev/null
-    if [ ${additlines:-0} -gt 0 ]
+    if [ "${additlines:-0}" -gt 0 ]
     then
       _echo "Found '${dotgitdest}.d', ${additlines} lines." && {
 cat - <<_EOD_
@@ -497,14 +491,14 @@ _EOD_
 
   fi || continue
 
-  dotgitline=$(cat "${dotgit_out}" 2>/dev/null |wc -l)
+  dotgitline=$(wc -l <"${dotgit_out}" 2>/dev/null)
 
   : "Diff" && {
 
     echo "${dotgit_out##*/} >>>"
 
     cat -n "${dotgit_out}" |
-    if [ ${dotgitline} -gt 10 ]
+    if [ "${dotgitline}" -gt 10 ]
     then head -n 9; printf "%s\t\t%s" ":" ":"; echo
     else cat
     fi || :

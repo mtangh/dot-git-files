@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2015,SC2034,SC2086
 [ -n "$BASH" ] 1>/dev/null 2>&1 || {
 echo "Run it in bash." 1>&2; exit 1; }
 THIS="${BASH_SOURCE:-./gitfilesupdate.sh}"
@@ -12,12 +13,14 @@ set -Cu
 set -o pipefail
 # Script URI
 scripturi="${DOT_GIT_FILES_INSTALL_SH:-}"
-[ -z "${scripturi}" -a -s "${CDIR}/update.sh" ] &&
-scripturi="${CDIR}/update.sh" || :
-[ -z "${scripturi}" -a ! -s "${CDIR}/update.sh" ] && {
-scripturi="https://raw.githubusercontent.com"
-scripturi="${scripturi}/mtangh/dot-git-files"
-scripturi="${scripturi}/master/update.sh"; } || :
+if [ -z "${scripturi}" ] && [ -s "${CDIR}/update.sh" ]
+then scripturi="${CDIR}/update.sh"; fi
+if [ -z "${scripturi}" ] && [ ! -s "${CDIR}/update.sh" ]
+then
+  scripturi="https://raw.githubusercontent.com"
+  scripturi="${scripturi}/mtangh/dot-git-files"
+  scripturi="${scripturi}/master/update.sh"
+fi
 # Shell opts
 shellopts="-s --"
 [ -n "${SHELLOPTS:-}" ] &&
@@ -27,10 +30,10 @@ shellopts="-x ${shellopts}"
 scriptget=""
 case "${scripturi:-}" in
 http://*|https://*)
-  [ -z "${scriptget}" -a -n "$(type -P curl 2>/dev/null)" ] &&
-  scriptget="$(type -P curl 2>/dev/null) -sL" || :
-  [ -z "${scriptget}" -a  -n "$(type -P wget 2>/dev/null)" ] &&
-  scriptget="$(type -P wget 2>/dev/null) -qO -" || :
+  if [ -z "${scriptget}" ] && [ -n "$(type -P curl 2>/dev/null)" ]
+  then scriptget="$(type -P curl 2>/dev/null) -sL"; fi
+  if [ -z "${scriptget}" ] && [ -n "$(type -P wget 2>/dev/null)" ]
+  then scriptget="$(type -P wget 2>/dev/null) -qO -"; fi
   ;;
 *)
   scriptget="cat"
