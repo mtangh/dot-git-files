@@ -11,6 +11,11 @@ set -Cu
 # The return value of a pipeline is the value of the last command to
 # exit with a non-zero status.
 set -o pipefail
+# Shell opts
+shellopts="-s --"
+[ -n "${SHELLOPTS:-}" ] &&
+[[ ${SHELLOPTS:-} =~ (^|:)xtrace(:|$) ]] &&
+shellopts="-x ${shellopts}"
 # Script URI
 scripturi="${DOT_GIT_FILES_INSTALL_SH:-}"
 if [ -z "${scripturi}" ] && [ -s "${CDIR}/update.sh" ]
@@ -21,11 +26,6 @@ then
   scripturi="${scripturi}/mtangh/dot-git-files"
   scripturi="${scripturi}/master/update.sh"
 fi
-# Shell opts
-shellopts="-s --"
-[ -n "${SHELLOPTS:-}" ] &&
-[[ ${SHELLOPTS:-} =~ (^|:)xtrace(:|$) ]] &&
-shellopts="-x ${shellopts}"
 # Get Command
 scriptget=""
 case "${scripturi:-}" in
@@ -39,6 +39,7 @@ http://*|https://*)
   scriptget="cat"
   ;;
 esac
+# Exec
 ${scriptget} "${scripturi}" |exec ${BASH} ${shellopts} "$@"
 # End
 exit $?
